@@ -28,7 +28,9 @@ def download_data(datadir: Path) -> None:
 def download_file(savename: Path, data_url: str) -> None:
     response = requests.get(data_url)
     response.raise_for_status()  # Ensure we notice bad responses
+    logging.info(f"Ensure the directory {savename.parent} exists")
     savename.parent.mkdir(parents=True, exist_ok=True)
+    logging.info(f"Opening file {savename} for writing")
     # NOTE: Using 'wb' should work for all file types.
     with open(savename, "wb") as f:
         f.write(response.content)
