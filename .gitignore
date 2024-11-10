@@ -1,0 +1,9 @@
+docker/git_repo.tar.gz
+/.coverage
+__pycache__/
+.pytest_cache
+*.pyc
+/.tox
+/docs/_build
+/dist
+/.venv
