@@ -1,3 +1,4 @@
+import os
 import pytest
 from pytest_mock.plugin import MockerFixture
 
@@ -36,7 +37,8 @@ class TestDownloadData:
         config = Config()
         if tgz_exists:
             tgz_file = FileNames.tgz_test_file1
-            filename = "/tmp/test_tar/etc/testfile.txt"
+            filename = os.path.join("tmp", "test_tar", "etc", "testfile.txt")
+            filename = os.path.abspath(filename)
         else:
             tgz_file = "non_existent.tgz"
             filename = "dummy_file"
