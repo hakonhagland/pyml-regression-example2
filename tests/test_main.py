@@ -39,9 +39,13 @@ class TestDownloadDataCmd:
         mock_requests_get: MockRequestGet,
     ) -> None:
         caplog.set_level(logging.INFO)
-        prepare_data_dir(datafiles_exists=datafile_exists)
+        datadir = prepare_data_dir(datafiles_exists=datafile_exists)
         prepare_config_dir(add_config_ini=True)
-        if not datafile_exists:
+        if datafile_exists:
+            # We need to delete housing.csv, or else the test will fail on Windows
+            # For some reason, tarfile.extract() will not overwrite the file on Windows
+            (datadir / FileNames.housing_csv).unlink()
+        else:
             file_contents = datafile_contents(FileNames.housing_tgz)
             mock_requests_get(file_contents)
         runner = CliRunner()
