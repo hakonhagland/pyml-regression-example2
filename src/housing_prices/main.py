@@ -50,6 +50,14 @@ def main(ctx: click.Context, verbose: bool) -> None:
     """``housing-prices`` let's you explore the housing price data presented in Chapter 2 of the book
     `Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow (3rd ed.) <https://github.com/ageron/handson-ml3>`_.
 
+    The following subcommands are available:
+
+    * ``download-data``: Download the housing price data from the book's web page.
+
+    * ``info``: Print information about the housing price data.
+
+    * ``describe-column``: Print information about a specific column in the housing price data.
+
     """
     ctx.ensure_object(dict)
     ctx.obj["VERBOSE"] = verbose
@@ -79,3 +87,24 @@ def info() -> None:
         housing.info()
         local_path = helpers.get_housing_local_path(config)
         print(f"Data file path: {local_path}")
+
+
+@main.command(cls=click_command_cls)
+@click.argument("column-name", type=str)
+def describe_column(column_name: str) -> None:
+    """``housing-prices describe-column`` prints information about a specific column. See
+    ``housing-prices info`` for information about the housing price column names."""
+    config = Config()
+    housing = helpers.get_housing_data(config, download=True)
+    if housing is not None:
+        print(housing[column_name].describe())
+
+
+@main.command(cls=click_command_cls)
+def plot_histograms() -> None:
+    """``housing-prices plot-histograms`` plots histograms of the housing price data."""
+    config = Config()
+    housing = helpers.get_housing_data(config, download=True)
+    if housing is not None:
+        housing.hist(bins=50, figsize=(20, 15))
+        plt.show()  # type: ignore

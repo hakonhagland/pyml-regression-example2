@@ -13,7 +13,7 @@ class PrepareConfigDir(Protocol):  # pragma: no cover
 
 
 class PrepareDataDir(Protocol):  # pragma: no cover
-    def __call__(self, datafiles_exists: bool) -> Path:
+    def __call__(self, datafiles_exists: bool, housing_csv: bool = False) -> Path:
         pass
 
 

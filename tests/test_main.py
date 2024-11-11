@@ -1,7 +1,9 @@
 import logging
 
+import pandas as pd
 import pytest
 from _pytest.logging import LogCaptureFixture
+from pytest_mock.plugin import MockerFixture
 from click.testing import CliRunner
 
 from housing_prices.constants import FileNames
@@ -39,13 +41,9 @@ class TestDownloadDataCmd:
         mock_requests_get: MockRequestGet,
     ) -> None:
         caplog.set_level(logging.INFO)
-        datadir = prepare_data_dir(datafiles_exists=datafile_exists)
+        prepare_data_dir(datafiles_exists=datafile_exists, housing_csv=False)
         prepare_config_dir(add_config_ini=True)
-        if datafile_exists:
-            # We need to delete housing.csv, or else the test will fail on Windows
-            # For some reason, tarfile.extract() will not overwrite the file on Windows
-            (datadir / FileNames.housing_csv).unlink()
-        else:
+        if not datafile_exists:
             file_contents = datafile_contents(FileNames.housing_tgz)
             mock_requests_get(file_contents)
         runner = CliRunner()
@@ -67,13 +65,49 @@ class TestInfoCmd:
         prepare_data_dir: PrepareDataDir,
     ) -> None:
         caplog.set_level(logging.INFO)
-        datadir = prepare_data_dir(datafiles_exists=datafiles_exists)
+        prepare_data_dir(datafiles_exists=datafiles_exists, housing_csv=False)
         prepare_config_dir(add_config_ini=True)
-        if datafiles_exists:
-            # We need to delete housing.csv, or else the test will fail on Windows
-            # For some reason, tarfile.extract() will not overwrite the file on Windows
-            (datadir / FileNames.housing_csv).unlink()
         runner = CliRunner()
         args = ["info"]
         result = runner.invoke(main.main, args)
         assert result.exit_code == 0
+
+
+class TestDescribeColumnCmd:
+    def test_invoke(
+        self,
+        caplog: LogCaptureFixture,
+        prepare_config_dir: PrepareConfigDir,
+        prepare_data_dir: PrepareDataDir,
+    ) -> None:
+        caplog.set_level(logging.INFO)
+        prepare_data_dir(datafiles_exists=True, housing_csv=False)
+        prepare_config_dir(add_config_ini=True)
+        runner = CliRunner()
+        args = ["describe-column", "total_rooms"]
+        result = runner.invoke(main.main, args)
+        assert result.exit_code == 0
+
+
+class TestPlotHistogramsCmd:
+    def test_invoke(
+        self,
+        caplog: LogCaptureFixture,
+        mocker: MockerFixture,
+        prepare_config_dir: PrepareConfigDir,
+        prepare_data_dir: PrepareDataDir,
+    ) -> None:
+        caplog.set_level(logging.INFO)
+        prepare_data_dir(datafiles_exists=True, housing_csv=False)
+        prepare_config_dir(add_config_ini=True)
+        mock_hist = mocker.patch.object(pd.DataFrame, "hist")
+        mocker.patch("matplotlib.pyplot.show", return_value=None)
+        import matplotlib
+
+        matplotlib.use("Agg")
+
+        runner = CliRunner()
+        args = ["plot-histograms"]
+        result = runner.invoke(main.main, args)
+        assert result.exit_code == 0
+        mock_hist.assert_called_once_with(bins=50, figsize=(20, 15))

@@ -102,7 +102,7 @@ def prepare_data_dir(
     test_data: PytestDataDict,
     mocker: MockerFixture,
 ) -> PrepareDataDir:
-    def _prepare_data_dir(datafiles_exists: bool) -> Path:
+    def _prepare_data_dir(datafiles_exists: bool, housing_csv: bool = False) -> Path:
         data_dir = tmp_path / test_data["data_dir"]
         data_dir.mkdir()
         data_dirlock_fn = test_file_path / test_data["data_dir"] / Config.dirlock_fn
@@ -112,12 +112,14 @@ def prepare_data_dir(
             return_value=data_dir,
         )
         if datafiles_exists:
-            for filename in [
-                FileNames.housing_csv,
+            filenames = [
                 FileNames.housing_tgz,
                 FileNames.tgz_test_file1,
                 FileNames.tgz_test_file2,
-            ]:
+            ]
+            if housing_csv:
+                filenames.append(FileNames.housing_csv)  # pragma: no cover
+            for filename in filenames:
                 datafile_fn = test_file_path / test_data["data_dir"] / filename
                 shutil.copy(datafile_fn, data_dir)
         return data_dir
