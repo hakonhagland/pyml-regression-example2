@@ -1,4 +1,8 @@
 Results
 =======
 
-Running ``housing-prices plot-data`` gives:
+Running ``housing-prices plot-histograms`` gives:
+
+.. image:: images/histograms.png
+   :alt: Histograms of the numerical features
+   :width: 100%
