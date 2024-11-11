@@ -63,8 +63,12 @@ class TestInfoCmd:
         prepare_data_dir: PrepareDataDir,
     ) -> None:
         caplog.set_level(logging.INFO)
-        prepare_data_dir(datafiles_exists=datafiles_exists)
+        datadir = prepare_data_dir(datafiles_exists=datafiles_exists)
         prepare_config_dir(add_config_ini=True)
+        if datafiles_exists:
+            # We need to delete housing.csv, or else the test will fail on Windows
+            # For some reason, tarfile.extract() will not overwrite the file on Windows
+            (datadir / FileNames.housing_csv).unlink()
         runner = CliRunner()
         args = ["info"]
         result = runner.invoke(main.main, args)
