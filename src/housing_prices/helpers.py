@@ -69,6 +69,8 @@ def extract_file_from_tgz(dir_name: Path, tgz_file: str, extract_file: str) -> N
             logging.warning(f"Skipping potentially unsafe path: {tarinfo.name}")
             return None
 
+    # NOTE: On Windows, the tarfile.extract() method does not overwrite existing files
+    #   so this may fail with a FileExistsError if the file exists on Windows
     with tarfile.open(tgz_path, "r:gz") as tar:
         tar.extract(extract_file, path=dir_name, filter=filter_tarinfo)
     # move the file to the correct location
