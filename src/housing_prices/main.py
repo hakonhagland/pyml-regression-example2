@@ -14,7 +14,9 @@ import numpy as np
 from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
 
 from housing_prices.config import Config
-from housing_prices import helpers
+from housing_prices.constants import TestSetGenMethod
+from housing_prices.split_data import SplitCrc
+from housing_prices import click_helpers, helpers
 
 # Most users should depend on colorama >= 0.4.6, and use just_fix_windows_console().
 colorama.just_fix_windows_console()
@@ -108,3 +110,38 @@ def plot_histograms() -> None:
     if housing is not None:
         housing.hist(bins=50, figsize=(20, 15))
         plt.show()  # type: ignore
+
+
+@main.command(cls=click_command_cls)
+@click.option(
+    "--method",
+    "-m",
+    callback=click_helpers.validate_test_set_gen_method,
+    default="CRC",
+    help="The method to use for creating the test set. Valid methods are: CRC, RANDOM, STRATIFIED",
+)
+@click.option(
+    "--test-ratio",
+    "-r",
+    type=float,
+    default=0.2,
+    help="The ratio of the test set size to the full dataset size. Default is 0.2",
+)
+def create_test_set(method: TestSetGenMethod, test_ratio: float) -> None:
+    """``housing-prices create-test-set`` creates a test set from the housing price data.
+    The default splitting ``--method`` is to use a ``CRC`` (Cyclic Redundancy Check) to split the data.
+    The other methods (not implemented yet) are ``RANDOM`` and ``STRATIFIED``. Method names can
+    be given in lowercase or uppercase. Short names are also accepted,
+    e.g. ``RND`` for ``RANDOM``, and ``STR`` for STRATIFIED. The test set ratio can be set with
+    the ``--test-ratio`` option. The default ratio is 0.2. The test ratio is the ratio of the test
+    set size to the full dataset size.
+    """
+    config = Config()
+    housing = helpers.get_housing_data(config, download=True)
+    if housing is not None:
+        if method == TestSetGenMethod.CRC:
+            SplitCrc(housing, config).split_data(test_ratio)
+        else:
+            raise NotImplementedError(
+                f"Test set generation method {method.value} not implemented yet"
+            )

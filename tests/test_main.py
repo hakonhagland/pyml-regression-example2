@@ -111,3 +111,26 @@ class TestPlotHistogramsCmd:
         result = runner.invoke(main.main, args)
         assert result.exit_code == 0
         mock_hist.assert_called_once_with(bins=50, figsize=(20, 15))
+
+
+class TestCreateTestSetCmd:
+    @pytest.mark.parametrize("method", ["crc", "random", "rnd", "bad"])
+    def test_invoke(
+        self,
+        method: str,
+        caplog: LogCaptureFixture,
+        prepare_config_dir: PrepareConfigDir,
+        prepare_data_dir: PrepareDataDir,
+    ) -> None:
+        caplog.set_level(logging.INFO)
+        prepare_data_dir(datafiles_exists=True, housing_csv=False)
+        prepare_config_dir(add_config_ini=True)
+        runner = CliRunner()
+        args = ["create-test-set", "--test-ratio", "0.2", "--method", method]
+        result = runner.invoke(main.main, args)
+        if method == "crc":
+            assert result.exit_code == 0
+        elif method == "bad":
+            assert result.exit_code == 2
+        else:
+            assert isinstance(result.exception, NotImplementedError)

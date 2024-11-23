@@ -2,7 +2,9 @@ import logging
 import requests
 import shutil
 import tarfile
+import zlib
 
+import numpy as np
 import pandas as pd
 from pathlib import Path
 from housing_prices.config import Config
@@ -100,3 +102,28 @@ def get_housing_local_path(config: Config) -> Path:
     datadir = config.get_data_dir()
     data_file = Path(datadir) / FileNames.housing_csv
     return data_file
+
+
+def get_train_set_path(datadir: Path, splitting_method: str) -> Path:
+    basename = Path(FileNames.housing_csv).stem
+    return datadir / Path(f"{basename}_train_{splitting_method}.csv")
+
+
+def get_test_set_path(datadir: Path, splitting_method: str) -> Path:
+    basename = Path(FileNames.housing_csv).stem
+    return datadir / Path(f"{basename}_test_{splitting_method}.csv")
+
+
+def split_data_with_id_hash(
+    data: pd.DataFrame, test_ratio: float, id_column: str
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    ids = data[id_column]
+
+    def is_id_in_test_set(identifier: int, test_ratio: float) -> bool:
+        # NOTE: On macOS and on Linux: zlib.crc32(np.int64(identifier)) works..
+        #       but not on Windows, it requires the bytes version below instead
+        identifier_bytes = np.int64(identifier).tobytes()
+        return zlib.crc32(identifier_bytes) < test_ratio * 2**32
+
+    in_test_set = ids.apply(lambda id_: is_id_in_test_set(id_, test_ratio))
+    return data.loc[~in_test_set], data.loc[in_test_set]
