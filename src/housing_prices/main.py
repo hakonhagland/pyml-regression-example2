@@ -9,6 +9,7 @@ import colorama
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 # import plotly.graph_objects as go
 from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
@@ -54,11 +55,15 @@ def main(ctx: click.Context, verbose: bool) -> None:
 
     The following subcommands are available:
 
-    * ``download-data``: Download the housing price data from the book's web page.
+    * ``create-test-set`` : Create a test set from the housing price data.
 
-    * ``info``: Print information about the housing price data.
+    * ``describe-column`` : Print information about a specific column in the housing price data.
 
-    * ``describe-column``: Print information about a specific column in the housing price data.
+    * ``download-data``   : Download the housing price data from the book's web page.
+
+    * ``info``            : Print information about the housing price data.
+
+    * ``plot-histograms`` : Plot histograms of the housing price data.
 
     """
     ctx.ensure_object(dict)
@@ -99,16 +104,40 @@ def describe_column(column_name: str) -> None:
     config = Config()
     housing = helpers.get_housing_data(config, download=True)
     if housing is not None:
+        # Check if the column name is valid
+        if column_name not in housing.columns:
+            logging.error(
+                f"Invalid column name '{column_name}'. Valid column names are: {housing.columns}"
+            )
+            return
         print(housing[column_name].describe())
 
 
 @main.command(cls=click_command_cls)
-def plot_histograms() -> None:
+@click.option(
+    "--column-name",
+    "-c",
+    type=str,
+    help="The column name to plot. If not given, all columns are plotted. A list of valid column names can be obtained with the ``housing-prices info`` command.",
+)
+def plot_histograms(column_name: str | None) -> None:
     """``housing-prices plot-histograms`` plots histograms of the housing price data."""
     config = Config()
     housing = helpers.get_housing_data(config, download=True)
     if housing is not None:
-        housing.hist(bins=50, figsize=(20, 15))
+        if column_name:
+            housing[column_name].hist(bins=50, figsize=(20, 15))
+            extra_label_info = helpers.get_extra_col_name_info(column_name)
+            col_name_str = (
+                column_name.replace("_", " ") if column_name else "all columns"
+            )
+            plt.title(f"Histogram of {col_name_str}")
+            col_name_str += extra_label_info
+            col_name_str = col_name_str.capitalize()
+            plt.xlabel(f"{col_name_str}")
+            plt.ylabel("Frequency")
+        else:
+            housing.hist(bins=50, figsize=(20, 15))
         plt.show()  # type: ignore
 
 
@@ -145,3 +174,69 @@ def create_test_set(method: TestSetGenMethod, test_ratio: float) -> None:
             raise NotImplementedError(
                 f"Test set generation method {method.value} not implemented yet"
             )
+
+
+@main.command(cls=click_command_cls)
+@click.argument("column-name", type=str)
+@click.option(
+    "--bins",
+    "-b",
+    required=True,
+    type=str,
+    callback=click_helpers.validate_bins,
+    help="Comma-separated list of bin edges. The number of bins is one less than the number of bin edges.",
+)
+def stratify_column(column_name: str, bins: str) -> None:
+    """``housing-prices stratify-column COLUMN`` stratifies the data in COLUMN of the
+    housing.csv data file. Use the ``--bins`` option to specify the bin edges. The number
+    of bins is one less than the number of bin edges. The bin edges should be given as a
+    comma-separated list of numbers. For example, ``--bins=0,100000,200000,300000`` will
+    create 3 bins: [0, 100000), [100000, 200000), [200000, 300000). See ``housing-prices info``
+    for information about the housing price column names, and ``housing-prices describe-column``
+    for information about the minimum and maximum column values. The strafified data bins are
+    labeled with consequtive integers starting from 1. Finally, the stratified data is plotted
+    as a histogram."""
+    config = Config()
+    housing = helpers.get_housing_data(config, download=True)
+    if housing is not None:
+        # Check if the column name is valid
+        if column_name not in housing.columns:
+            logging.error(
+                f"Invalid column name '{column_name}'. Valid column names are: {housing.columns}"
+            )
+            return
+        # Check that the minmum and maximum values are within the bin edges
+        min_val = housing[column_name].min()
+        max_val = housing[column_name].max()
+        if min_val < bins[0] or max_val > bins[-1]:
+            logging.error(
+                f"Column values must be within the bin edges. Got min: {min_val}, max: {max_val}, bins: {bins}"
+            )
+            return
+        # Assign labels 1,2,3,... to the bins
+        labels = np.arange(1, len(bins), 1)
+        stratified = pd.cut(housing[column_name], bins, labels=labels)  # type: ignore
+        fig, ax = plt.subplots()
+        bin_counts = stratified.value_counts().sort_index()
+        bars = ax.bar(
+            bin_counts.index.astype(str), bin_counts.values, tick_label=bin_counts.index
+        )
+
+        # ax = stratified.value_counts().sort_index().plot(kind="bar", rot=0, grid=True)
+
+        # Generate bin legends
+        legends = [
+            f"bin {i + 1}: [{bins[i]}, {bins[i + 1]}]" for i in range(len(bins) - 1)
+        ]
+        # Assign legends to each bar
+        for bar, legend in zip(bars, legends):
+            bar.set_label(legend)
+
+        # breakpoint()
+        # Add legends to the plot
+        ax.legend(title="Bins", handlelength=0)
+        column_name = column_name.capitalize()
+        ax.set_title(column_name.replace("_", " "))
+        ax.set_xlabel("Bins")
+        ax.set_ylabel("Frequency")
+        plt.show()  # type: ignore

@@ -3,6 +3,20 @@ from typing import Union
 import click
 
 
+def validate_bins(
+    ctx: click.Context, param: Union[click.Option, click.Parameter], value: str
+) -> list[float]:
+    try:
+        bins = [float(b) for b in value.split(",")]
+        if not all(earlier < later for earlier, later in zip(bins, bins[1:])):
+            raise click.BadParameter(f"Bins must be in ascending order. Got: {value}")
+        return bins
+    except ValueError:
+        raise click.BadParameter(
+            f"Invalid bin value '{value}'. Must be a comma-separated list of numbers."
+        )
+
+
 def validate_test_set_gen_method(
     ctx: click.Context, param: Union[click.Option, click.Parameter], value: str
 ) -> TestSetGenMethod:

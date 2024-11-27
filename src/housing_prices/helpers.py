@@ -84,6 +84,13 @@ def extract_file_from_tgz(dir_name: Path, tgz_file: str, extract_file: str) -> N
     logging.info(f"Extracted {extract_file} from {tgz_path}")
 
 
+def get_extra_col_name_info(column_name: str) -> str:
+    info = ""
+    if column_name == "median_income":
+        info = "($) (capped at 15, and scaled by 10,000)"
+    return info
+
+
 def get_housing_data(config: Config, download: bool = True) -> pd.DataFrame | None:
     """Return the data from the CSV file as a pandas DataFrame."""
     data_file = get_housing_local_path(config)
@@ -121,7 +128,7 @@ def split_data_with_id_hash(
 
     def is_id_in_test_set(identifier: int, test_ratio: float) -> bool:
         # NOTE: On macOS and on Linux: zlib.crc32(np.int64(identifier)) works..
-        #       but not on Windows, it requires the bytes version below instead
+        #       but on Windows, mypy requires the bytes version below instead
         identifier_bytes = np.int64(identifier).tobytes()
         return zlib.crc32(identifier_bytes) < test_ratio * 2**32
 

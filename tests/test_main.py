@@ -1,5 +1,6 @@
 import logging
 
+import matplotlib
 import pandas as pd
 import pytest
 from _pytest.logging import LogCaptureFixture
@@ -74,8 +75,10 @@ class TestInfoCmd:
 
 
 class TestDescribeColumnCmd:
+    @pytest.mark.parametrize("invalid_column", [False, True])
     def test_invoke(
         self,
+        invalid_column: bool,
         caplog: LogCaptureFixture,
         prepare_config_dir: PrepareConfigDir,
         prepare_data_dir: PrepareDataDir,
@@ -84,14 +87,22 @@ class TestDescribeColumnCmd:
         prepare_data_dir(datafiles_exists=True, housing_csv=False)
         prepare_config_dir(add_config_ini=True)
         runner = CliRunner()
-        args = ["describe-column", "total_rooms"]
+        col_name = "total_rooms"
+        if invalid_column:
+            col_name = "bad_column"
+        args = ["describe-column", col_name]
         result = runner.invoke(main.main, args)
-        assert result.exit_code == 0
+        if invalid_column:
+            assert caplog.records[-1].message.startswith("Invalid column name")
+        else:
+            assert result.exit_code == 0
 
 
 class TestPlotHistogramsCmd:
+    @pytest.mark.parametrize("column_name", [None, "median_income"])
     def test_invoke(
         self,
+        column_name: str | None,
         caplog: LogCaptureFixture,
         mocker: MockerFixture,
         prepare_config_dir: PrepareConfigDir,
@@ -102,15 +113,17 @@ class TestPlotHistogramsCmd:
         prepare_config_dir(add_config_ini=True)
         mock_hist = mocker.patch.object(pd.DataFrame, "hist")
         mocker.patch("matplotlib.pyplot.show", return_value=None)
-        import matplotlib
-
         matplotlib.use("Agg")
-
         runner = CliRunner()
         args = ["plot-histograms"]
+        if column_name:
+            args.extend(["--column-name", column_name])
         result = runner.invoke(main.main, args)
         assert result.exit_code == 0
-        mock_hist.assert_called_once_with(bins=50, figsize=(20, 15))
+        if column_name:
+            assert True
+        else:
+            mock_hist.assert_called_once_with(bins=50, figsize=(20, 15))
 
 
 class TestCreateTestSetCmd:
@@ -134,3 +147,56 @@ class TestCreateTestSetCmd:
             assert result.exit_code == 2
         else:
             assert isinstance(result.exception, NotImplementedError)
+
+
+class TestStratifyColumnCmd:
+    @pytest.mark.parametrize(
+        "col_name,bins_too_narrow,bins_descending,bins_nan",
+        [
+            ["median_income", False, False, False],
+            ["bad_column", False, False, False],
+            ["median_income", True, False, False],
+            ["median_income", False, True, False],
+            ["median_income", False, False, True],
+        ],
+    )
+    def test_invoke(
+        self,
+        col_name: str,
+        bins_too_narrow: bool,
+        bins_descending: bool,
+        bins_nan: bool,
+        caplog: LogCaptureFixture,
+        mocker: MockerFixture,
+        prepare_config_dir: PrepareConfigDir,
+        prepare_data_dir: PrepareDataDir,
+    ) -> None:
+        caplog.set_level(logging.INFO)
+        prepare_data_dir(datafiles_exists=True, housing_csv=False)
+        prepare_config_dir(add_config_ini=True)
+        mocker.patch("matplotlib.pyplot.show", return_value=None)
+        matplotlib.use("Agg")
+        runner = CliRunner()
+        bins = "4,5,5.5,6,9"
+        if bins_too_narrow:
+            bins = "6,16,32"
+        elif bins_descending:
+            bins = "9,6,5,3"
+        elif bins_nan:
+            bins = "a,4,5,5.5,6,9,a"
+        args = ["stratify-column", "--bins", bins, col_name]
+        result = runner.invoke(main.main, args)
+        if col_name == "bad_column":
+            assert caplog.records[-1].message.startswith("Invalid column name")
+        if bins_too_narrow:
+            assert caplog.records[-1].message.startswith(
+                "Column values must be within the bin edges"
+            )
+        elif bins_descending:
+            assert result.exit_code == 2
+            assert result.stdout.startswith("Usage: main stratify-column")
+        elif bins_nan:
+            assert result.exit_code == 2
+            assert result.stdout.startswith("Usage: main stratify-column")
+        else:
+            assert result.exit_code == 0
