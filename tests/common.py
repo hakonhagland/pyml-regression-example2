@@ -13,7 +13,12 @@ class PrepareConfigDir(Protocol):  # pragma: no cover
 
 
 class PrepareDataDir(Protocol):  # pragma: no cover
-    def __call__(self, datafiles_exists: bool, housing_csv: bool = False) -> Path:
+    def __call__(
+        self,
+        datafiles_exists: bool,
+        housing_csv: bool = False,
+        stratified_dir: bool = False,
+    ) -> Path:
         pass
 
 

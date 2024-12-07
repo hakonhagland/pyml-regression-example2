@@ -6,6 +6,7 @@ from pathlib import Path
 
 import platformdirs
 
+from housing_prices.constants import Directories, TestSetGenMethod, FileNames
 from housing_prices.exceptions import ConfigException
 
 
@@ -99,6 +100,46 @@ class Config:
 
     def get_config_path(self) -> Path:
         return self.config_path
+
+    def get_housing_local_path(self) -> Path:
+        datadir = self.get_data_dir()
+        data_file = Path(datadir) / FileNames.housing_csv
+        return data_file
+
+    def get_stratified_column_bin_filename(self, column_name: str) -> Path:
+        dir_ = self.get_stratified_column_dir(column_name)
+        filename = dir_ / FileNames.bins_txt
+        return filename
+
+    def get_stratified_column_csv_filename(self, column_name: str) -> Path:
+        dir_ = self.get_stratified_column_dir(column_name)
+        csv_file = dir_ / FileNames.column_csv
+        return csv_file
+
+    def get_stratified_column_dir(self, column_name: str) -> Path:
+        datadir: Path = self.get_data_dir()
+        strat_dir = TestSetGenMethod.STRATIFIED.dirname
+        dir_ = datadir / strat_dir / Directories.columns / f"{column_name}"
+        if not dir_.exists():
+            dir_.mkdir(parents=True)
+        return dir_
+
+    def get_test_train_dir(
+        self, splitting_method: TestSetGenMethod, ensure_exists: bool = True
+    ) -> Path:
+        datadir = self.get_data_dir()
+        dir_ = datadir / splitting_method.dirname
+        if ensure_exists:
+            dir_.mkdir(parents=True, exist_ok=True)
+        return dir_
+
+    def get_train_set_path(self, splitting_method: TestSetGenMethod) -> Path:
+        dir_ = self.get_test_train_dir(splitting_method)
+        return dir_ / FileNames.train_csv
+
+    def get_test_set_path(self, splitting_method: TestSetGenMethod) -> Path:
+        dir_ = self.get_test_train_dir(splitting_method)
+        return dir_ / FileNames.test_csv
 
     def read_config(self) -> None:
         path = self.get_config_path()

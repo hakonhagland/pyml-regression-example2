@@ -16,7 +16,7 @@ from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
 
 from housing_prices.config import Config
 from housing_prices.constants import TestSetGenMethod
-from housing_prices.split_data import SplitCrc
+from housing_prices.split_data import SplitCrc, SplitStratified
 from housing_prices import click_helpers, helpers
 
 # Most users should depend on colorama >= 0.4.6, and use just_fix_windows_console().
@@ -65,6 +65,8 @@ def main(ctx: click.Context, verbose: bool) -> None:
 
     * ``plot-histograms`` : Plot histograms of the housing price data.
 
+    * ``stratify-column`` : Stratify the data in a column of the housing price data.
+
     """
     ctx.ensure_object(dict)
     ctx.obj["VERBOSE"] = verbose
@@ -92,7 +94,7 @@ def info() -> None:
     housing = helpers.get_housing_data(config, download=True)
     if housing is not None:
         housing.info()
-        local_path = helpers.get_housing_local_path(config)
+        local_path = config.get_housing_local_path()
         print(f"Data file path: {local_path}")
 
 
@@ -156,20 +158,38 @@ def plot_histograms(column_name: str | None) -> None:
     default=0.2,
     help="The ratio of the test set size to the full dataset size. Default is 0.2",
 )
-def create_test_set(method: TestSetGenMethod, test_ratio: float) -> None:
+@click.option(
+    "--stratify-column",
+    "-c",
+    type=str,
+    help="The column to stratify the data on. Column must be prepared in advance with the ``stratify-column`` command.",
+)
+def create_test_set(
+    method: TestSetGenMethod, test_ratio: float, stratify_column: str
+) -> None:
     """``housing-prices create-test-set`` creates a test set from the housing price data.
     The default splitting ``--method`` is to use a ``CRC`` (Cyclic Redundancy Check) to split the data.
-    The other methods (not implemented yet) are ``RANDOM`` and ``STRATIFIED``. Method names can
+    Stratified splitting can also be used with the ``STRATIFIED`` method. It requires a column name
+    to stratify the data on. It is assumed that the column has been prepared in advance with the ``stratify-column`` command.
+    The ``RANDOM`` method is not implemented yet. Method names can
     be given in lowercase or uppercase. Short names are also accepted,
     e.g. ``RND`` for ``RANDOM``, and ``STR`` for STRATIFIED. The test set ratio can be set with
     the ``--test-ratio`` option. The default ratio is 0.2. The test ratio is the ratio of the test
-    set size to the full dataset size.
+    set size to the full dataset size. If method is ``STRATIFIED``, the ``--stratify-column`` option
+    can be used to specify the column to stratify the data on. See ``housing-prices stratify-column``
     """
     config = Config()
     housing = helpers.get_housing_data(config, download=True)
     if housing is not None:
         if method == TestSetGenMethod.CRC:
             SplitCrc(housing, config).split_data(test_ratio)
+        elif method == TestSetGenMethod.STRATIFIED:
+            if stratify_column is None:
+                logging.error(
+                    "The STRATIFIED method requires a column name for stratification."
+                )
+                return
+            SplitStratified(housing, config).split_data(test_ratio, stratify_column)
         else:
             raise NotImplementedError(
                 f"Test set generation method {method.value} not implemented yet"
@@ -186,7 +206,7 @@ def create_test_set(method: TestSetGenMethod, test_ratio: float) -> None:
     callback=click_helpers.validate_bins,
     help="Comma-separated list of bin edges. The number of bins is one less than the number of bin edges.",
 )
-def stratify_column(column_name: str, bins: str) -> None:
+def stratify_column(column_name: str, bins: list[float]) -> None:
     """``housing-prices stratify-column COLUMN`` stratifies the data in COLUMN of the
     housing.csv data file. Use the ``--bins`` option to specify the bin edges. The number
     of bins is one less than the number of bin edges. The bin edges should be given as a
@@ -216,10 +236,13 @@ def stratify_column(column_name: str, bins: str) -> None:
         # Assign labels 1,2,3,... to the bins
         labels = np.arange(1, len(bins), 1)
         stratified = pd.cut(housing[column_name], bins, labels=labels)  # type: ignore
+        helpers.save_stratified_column(config, column_name, stratified, bins)
         fig, ax = plt.subplots()
         bin_counts = stratified.value_counts().sort_index()
         bars = ax.bar(
-            bin_counts.index.astype(str), bin_counts.values, tick_label=bin_counts.index
+            bin_counts.index.astype(float),
+            bin_counts.values,
+            tick_label=bin_counts.index,
         )
 
         # ax = stratified.value_counts().sort_index().plot(kind="bar", rot=0, grid=True)

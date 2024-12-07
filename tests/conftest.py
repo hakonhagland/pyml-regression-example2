@@ -8,7 +8,7 @@ import pytest
 from pytest_mock.plugin import MockerFixture
 
 from housing_prices.config import Config
-from housing_prices.constants import FileNames
+from housing_prices.constants import FileNames, TestSetGenMethod
 from .common import DataFileContents, PrepareConfigDir, PrepareDataDir, MockRequestGet
 
 PytestDataDict = dict[str, str]
@@ -24,6 +24,7 @@ def test_data() -> PytestDataDict:
     return {
         "config_dir": "config",
         "data_dir": "data",
+        "stratified_dir": "stratified",
     }
 
 
@@ -102,7 +103,11 @@ def prepare_data_dir(
     test_data: PytestDataDict,
     mocker: MockerFixture,
 ) -> PrepareDataDir:
-    def _prepare_data_dir(datafiles_exists: bool, housing_csv: bool = False) -> Path:
+    def _prepare_data_dir(
+        datafiles_exists: bool,
+        housing_csv: bool = False,
+        stratified_dir: bool = False,
+    ) -> Path:
         data_dir = tmp_path / test_data["data_dir"]
         data_dir.mkdir()
         data_dirlock_fn = test_file_path / test_data["data_dir"] / Config.dirlock_fn
@@ -122,6 +127,16 @@ def prepare_data_dir(
             for filename in filenames:
                 datafile_fn = test_file_path / test_data["data_dir"] / filename
                 shutil.copy(datafile_fn, data_dir)
+            if stratified_dir:
+                # Recursively copy the stratified column directories
+                source_dir = (
+                    test_file_path
+                    / test_data["data_dir"]
+                    / TestSetGenMethod.STRATIFIED.dirname
+                )
+                shutil.copytree(
+                    source_dir, data_dir / TestSetGenMethod.STRATIFIED.dirname
+                )
         return data_dir
 
     return _prepare_data_dir

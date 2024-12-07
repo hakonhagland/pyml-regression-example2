@@ -8,6 +8,31 @@ import housing_prices.helpers as helpers
 from .common import PrepareConfigDir, PrepareDataDir
 
 
+class TestStratifiedColumnBins:
+    @pytest.mark.parametrize("file_exists", [False, True])
+    def test_read_stratified_column_bins(
+        self,
+        file_exists: bool,
+        mocker: MockerFixture,
+        prepare_config_dir: PrepareConfigDir,
+        prepare_data_dir: PrepareDataDir,
+    ) -> None:
+        prepare_config_dir(add_config_ini=True)
+        prepare_data_dir(datafiles_exists=True, stratified_dir=True)
+        config = Config()
+        bin_file = config.get_stratified_column_bin_filename("median_income")
+        if not file_exists:
+            # Remove the file
+            bin_file.unlink(missing_ok=True)
+        column_name = "median_income"
+        if file_exists:
+            bins = helpers.read_stratified_column_bins(config, column_name)
+            assert len(bins) == 6
+        else:
+            with pytest.raises(FileNotFoundError):
+                helpers.read_stratified_column_bins(config, column_name)
+
+
 class TestDownloadData:
     def test_download_from_url(
         self,

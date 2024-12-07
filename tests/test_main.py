@@ -127,22 +127,39 @@ class TestPlotHistogramsCmd:
 
 
 class TestCreateTestSetCmd:
-    @pytest.mark.parametrize("method", ["crc", "random", "rnd", "bad"])
+    @pytest.mark.parametrize(
+        "method,bad_strat",
+        [
+            ["crc", False],
+            ["str", False],
+            ["random", False],
+            ["rnd", False],
+            ["bad", False],
+            ["str", True],
+        ],
+    )
     def test_invoke(
         self,
         method: str,
+        bad_strat: bool,
         caplog: LogCaptureFixture,
         prepare_config_dir: PrepareConfigDir,
         prepare_data_dir: PrepareDataDir,
     ) -> None:
         caplog.set_level(logging.INFO)
-        prepare_data_dir(datafiles_exists=True, housing_csv=False)
+        prepare_data_dir(datafiles_exists=True, housing_csv=False, stratified_dir=True)
         prepare_config_dir(add_config_ini=True)
         runner = CliRunner()
         args = ["create-test-set", "--test-ratio", "0.2", "--method", method]
+        if method == "str" and not bad_strat:
+            args.extend(["--stratify-column", "median_income"])
         result = runner.invoke(main.main, args)
-        if method == "crc":
+        if method in ["crc", "str"]:
             assert result.exit_code == 0
+            if bad_strat:
+                assert caplog.records[-1].message.startswith(
+                    "The STRATIFIED method requires a column name"
+                )
         elif method == "bad":
             assert result.exit_code == 2
         else:
@@ -177,13 +194,13 @@ class TestStratifyColumnCmd:
         mocker.patch("matplotlib.pyplot.show", return_value=None)
         matplotlib.use("Agg")
         runner = CliRunner()
-        bins = "4,5,5.5,6,9"
+        bins = "0,1.5,3,4.5,6,16"
         if bins_too_narrow:
             bins = "6,16,32"
         elif bins_descending:
             bins = "9,6,5,3"
         elif bins_nan:
-            bins = "a,4,5,5.5,6,9,a"
+            bins = "0,1.5,3,4.5,6,16,a"
         args = ["stratify-column", "--bins", bins, col_name]
         result = runner.invoke(main.main, args)
         if col_name == "bad_column":

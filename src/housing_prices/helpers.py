@@ -93,7 +93,7 @@ def get_extra_col_name_info(column_name: str) -> str:
 
 def get_housing_data(config: Config, download: bool = True) -> pd.DataFrame | None:
     """Return the data from the CSV file as a pandas DataFrame."""
-    data_file = get_housing_local_path(config)
+    data_file = config.get_housing_local_path()
     datadir = config.get_data_dir()
     # Check that the data file exists, if not download it
     if not data_file.exists():
@@ -105,20 +105,28 @@ def get_housing_data(config: Config, download: bool = True) -> pd.DataFrame | No
     return pd.read_csv(data_file)
 
 
-def get_housing_local_path(config: Config) -> Path:
-    datadir = config.get_data_dir()
-    data_file = Path(datadir) / FileNames.housing_csv
-    return data_file
+def read_stratified_column_bins(config: Config, column_name: str) -> list[float]:
+    bin_file = config.get_stratified_column_bin_filename(column_name)
+    if not bin_file.exists():
+        raise FileNotFoundError(f"Bin file {str(bin_file)} not found")
+    with open(bin_file, "r") as f:
+        bins = [float(line.strip()) for line in f]
+    return bins
 
 
-def get_train_set_path(datadir: Path, splitting_method: str) -> Path:
-    basename = Path(FileNames.housing_csv).stem
-    return datadir / Path(f"{basename}_train_{splitting_method}.csv")
-
-
-def get_test_set_path(datadir: Path, splitting_method: str) -> Path:
-    basename = Path(FileNames.housing_csv).stem
-    return datadir / Path(f"{basename}_test_{splitting_method}.csv")
+def save_stratified_column(
+    config: Config,
+    column_name: str,
+    stratified: pd.Series,  # type: ignore
+    bins: list[float],
+) -> None:
+    stratified_file = config.get_stratified_column_csv_filename(column_name)
+    stratified.to_csv(stratified_file, index=False)
+    bin_file = config.get_stratified_column_bin_filename(column_name)
+    with open(bin_file, "w") as f:
+        f.write("\n".join([str(b) for b in bins]))
+    logging.info(f"Stratified column saved to {stratified_file}")
+    logging.info(f"Bin info saved to {bin_file}")
 
 
 def split_data_with_id_hash(
