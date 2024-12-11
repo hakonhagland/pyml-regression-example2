@@ -31,7 +31,7 @@ evaluation.
 Mathematical details
 ^^^^^^^^^^^^^^^^^^^^
 
-Assume we have a function :math:`\mathcal{P}` that, given an array, returns a `random permutation <https://numpy.org/doc/stable/reference/random/generated/numpy.random.RandomState.permutation.html>`__ of its elements. Here is a step-by-step guide to stratified sampling example above:
+Assume we have a function :math:`\mathcal{P}` that, given an array, returns a `random permutation <https://numpy.org/doc/stable/reference/random/generated/numpy.random.RandomState.permutation.html>`__ of its element (an efficient method for generating a permutation is the `Fisher-Yates Shuffle Algorithm <https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle>`__). Here is a step-by-step guide to stratified sampling example above:
 
 1. **Notation:**
 
