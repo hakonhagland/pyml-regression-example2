@@ -1,0 +1,211 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stratified sampling &mdash; pyml-regression-example2 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Results" href="../results.html" />
+    <link rel="prev" title="Ordinary Least Squares" href="least_squares.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            pyml-regression-example2
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../theory.html">Theory</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="linear_regression.html">LinearRegression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="least_squares.html">Ordinary Least Squares</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Stratified sampling</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#an-example">An Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mathematical-details">Mathematical details</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../results.html">Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../todo.html">TODO</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyml-regression-example2</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../theory.html">Theory</a></li>
+      <li class="breadcrumb-item active">Stratified sampling</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/hakonhagland/pyml-regression-example2/blob/main/docs/theory/stratified_sampling.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="stratified-sampling">
+<h1>Stratified sampling<a class="headerlink" href="#stratified-sampling" title="Link to this heading"></a></h1>
+<p>When creating training and test splits for a machine learning model, it is important to maintain the
+original distribution of key characteristics present in the data. This ensures that the test set is
+representative of the full dataset, preventing biased evaluation and unrealistic performance
+estimates. <a class="reference external" href="https://en.wikipedia.org/wiki/Stratified_sampling">Stratified sampling</a> is a technique
+designed exactly for this purpose: it divides the data
+into distinct groups (called “strata”) based on certain attributes, and then samples from each group
+proportionally, preserving the overall class distribution.</p>
+<section id="an-example">
+<h2>An Example<a class="headerlink" href="#an-example" title="Link to this heading"></a></h2>
+<p>Imagine you have a dataset where each row represents a person. There are only two columns:</p>
+<p>Party Vote: Which political party the person voted for—either Democrat or Republican.
+Sex: The person’s sex—Male (M) or Female (F).
+Suppose that in the full dataset, 55% are male and 45% are female. If you simply took a random sample
+for the test set, you might accidentally end up with a subset that, for example, has a much higher
+proportion of males than the original dataset. This skewed distribution could lead to a test set that
+does not accurately reflect the population your model is meant to serve.</p>
+<p>By using stratified sampling, you first separate the data into two strata: one for males and one for
+females. Then, if you decide to create a 20% test set, you draw 20% from the male strata and 20% from
+the female strata. This ensures that if your entire dataset is 55% male and 45% female, your test set
+will also reflect those same percentages. As a result, your training and test splits more accurately
+mirror the original data’s characteristics, providing a fairer and more reliable basis for model
+evaluation.</p>
+<section id="mathematical-details">
+<h3>Mathematical details<a class="headerlink" href="#mathematical-details" title="Link to this heading"></a></h3>
+<p>Assume we have a function <span class="math notranslate nohighlight">\(\mathcal{P}\)</span> that, given an array, returns a <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.RandomState.permutation.html">random permutation</a> of its elements. Here is a step-by-step guide to stratified sampling example above:</p>
+<ol class="arabic">
+<li><p><strong>Notation:</strong></p>
+<p>Let the total number of samples be <span class="math notranslate nohighlight">\(N\)</span>.</p>
+<p>Let the fraction of the dataset we want for the test set be <span class="math notranslate nohighlight">\(f\)</span>. For example, if we want 20% of the data for testing, <span class="math notranslate nohighlight">\(f = 0.2\)</span>.</p>
+<p>The dataset consists of two strata (groups): Male (M) and Female (F).</p>
+<p>Let:</p>
+<div class="math notranslate nohighlight">
+\[N_M = \text{number of male samples}, \quad N_F = \text{number of female samples}\]</div>
+<p>Clearly, <span class="math notranslate nohighlight">\(N = N_M + N_F\)</span>.</p>
+</li>
+<li><p><strong>Identify Strata:</strong></p>
+<p>From the dataset, separate the indices of male samples from the indices of female samples. Suppose:</p>
+<div class="math notranslate nohighlight">
+\[I_M = [i_1, i_2, \dots, i_{N_M}], \quad I_F = [j_1, j_2, \dots, j_{N_F}]\]</div>
+</li>
+</ol>
+<section id="applying-stratified-sampling">
+<h4>Applying Stratified Sampling<a class="headerlink" href="#applying-stratified-sampling" title="Link to this heading"></a></h4>
+<ol class="arabic">
+<li><p><strong>Determine the Number of Samples per Stratum for the Test Set:</strong></p>
+<p>Since we want to preserve the original ratio, we take the same fraction <span class="math notranslate nohighlight">\(f\)</span> from each stratum:</p>
+<div class="math notranslate nohighlight">
+\[N_{M,\text{test}} = \lfloor f \cdot N_M \rfloor, \quad N_{F,\text{test}} = \lfloor f \cdot N_F \rfloor\]</div>
+<p>Here, <span class="math notranslate nohighlight">\(\lfloor x \rfloor\)</span> denotes the floor function, which rounds <span class="math notranslate nohighlight">\(x\)</span> down to the nearest integer.</p>
+</li>
+<li><p><strong>Randomizing Within Each Stratum:</strong></p>
+<p>Apply a random permutation <span class="math notranslate nohighlight">\(\mathcal{P}\)</span> to the indices within each stratum to ensure random selection:</p>
+<div class="math notranslate nohighlight">
+\[I_M^{\text{perm}} = \mathcal{P}(I_M), \quad I_F^{\text{perm}} = \mathcal{P}(I_F)\]</div>
+</li>
+<li><p><strong>Selecting Test and Training Sets:</strong></p>
+<p>From these permuted arrays, select the first <span class="math notranslate nohighlight">\(N_{M,\text{test}}\)</span> male indices and the first <span class="math notranslate nohighlight">\(N_{F,\text{test}}\)</span> female indices for the test set:</p>
+<div class="math notranslate nohighlight">
+\[I_{M,\text{test}} = I_M^{\text{perm}}[1 : N_{M,\text{test}}], \quad
+I_{F,\text{test}} = I_F^{\text{perm}}[1 : N_{F,\text{test}}]\]</div>
+<p>The remaining indices in each stratum go to the training set:</p>
+<div class="math notranslate nohighlight">
+\[I_{M,\text{train}} = I_M^{\text{perm}}[N_{M,\text{test}} + 1 : N_M], \quad
+I_{F,\text{train}} = I_F^{\text{perm}}[N_{F,\text{test}} + 1 : N_F]\]</div>
+</li>
+<li><p><strong>Combine to Form the Final Sets:</strong></p>
+<p>Combine the test indices and the training indices:</p>
+<div class="math notranslate nohighlight">
+\[I_{\text{test}} = I_{M,\text{test}} \cup I_{F,\text{test}}, \quad
+I_{\text{train}} = I_{M,\text{train}} \cup I_{F,\text{train}}\]</div>
+<p>Thus, the test set maintains the same proportion of males and females as the full dataset:</p>
+<div class="math notranslate nohighlight">
+\[\frac{|I_{M,\text{test}}|}{|I_{\text{test}}|} \approx \frac{N_M}{N}, \quad
+\frac{|I_{F,\text{test}}|}{|I_{\text{test}}|} \approx \frac{N_F}{N}\]</div>
+</li>
+</ol>
+</section>
+<section id="summary">
+<h4>Summary<a class="headerlink" href="#summary" title="Link to this heading"></a></h4>
+<p>By splitting the data into strata (in this example, based on sex), and then sampling a proportionate number of elements from each stratum for the test set, we ensure that the test set’s attribute distribution reflects that of the entire dataset. The use of a random permutation ensures random selection within each stratum, and the use of flooring and indexing ensures that the appropriate number of samples from each category is chosen.</p>
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="least_squares.html" class="btn btn-neutral float-left" title="Ordinary Least Squares" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../results.html" class="btn btn-neutral float-right" title="Results" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Håkon Hægland.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
