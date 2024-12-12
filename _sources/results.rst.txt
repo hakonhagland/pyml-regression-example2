@@ -18,3 +18,9 @@ Running ``housing-prices stratify-column median_income --bins=0,1.5,3,4.5,6,16``
 .. image:: images/median_income_strat.png
    :alt: Stratified sampling of median income
    :width: 100%
+
+Running ``housing-prices plot-scatter`` gives:
+
+.. image:: images/scatter.png
+   :alt: Scatter plot of population size and median house value
+   :width: 100%
