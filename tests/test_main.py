@@ -1,4 +1,5 @@
 import logging
+import unittest.mock
 
 import matplotlib
 import pandas as pd
@@ -217,3 +218,37 @@ class TestStratifyColumnCmd:
             assert result.stdout.startswith("Usage: main stratify-column")
         else:
             assert result.exit_code == 0
+
+
+class TestPlotScatterCmd:
+    def test_invoke(
+        self,
+        caplog: LogCaptureFixture,
+        mocker: MockerFixture,
+        prepare_config_dir: PrepareConfigDir,
+        prepare_data_dir: PrepareDataDir,
+    ) -> None:
+        caplog.set_level(logging.INFO)
+        prepare_data_dir(datafiles_exists=True, housing_csv=True)
+        prepare_config_dir(add_config_ini=True)
+        mock_plot = mocker.patch.object(pd.DataFrame, "plot")
+        mocker.patch("matplotlib.pyplot.show", return_value=None)
+        matplotlib.use("Agg")
+        runner = CliRunner()
+        args = ["plot-scatter", "--alpha", "0.1"]
+        result = runner.invoke(main.main, args)
+        assert result.exit_code == 0
+        mock_plot.assert_called_once_with(
+            kind="scatter",
+            x="longitude",
+            y="latitude",
+            alpha=0.1,
+            s=unittest.mock.ANY,
+            figsize=(10, 7),
+            c="median_house_value",
+            cmap=unittest.mock.ANY,
+            colorbar=True,
+            sharex=False,
+            label="population",
+            grid=True,
+        )

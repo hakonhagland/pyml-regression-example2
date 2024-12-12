@@ -65,6 +65,8 @@ def main(ctx: click.Context, verbose: bool) -> None:
 
     * ``plot-histograms`` : Plot histograms of the housing price data.
 
+    * ``plot-scatter``    : Plot a scatter plot of the housing price data.
+
     * ``stratify-column`` : Stratify the data in a column of the housing price data.
 
     """
@@ -262,4 +264,36 @@ def stratify_column(column_name: str, bins: list[float]) -> None:
         ax.set_title(column_name.replace("_", " "))
         ax.set_xlabel("Bins")
         ax.set_ylabel("Frequency")
+        plt.show()  # type: ignore
+
+
+@main.command(cls=click_command_cls)
+@click.option(
+    "alpha", "--alpha", type=float, default=1.0, help="The transparency of the plot"
+)
+def plot_scatter(alpha: float) -> None:
+    """``housing-prices plot-scatter`` plots a scatter plot visualizing the population of
+    each district and the median house value of each district. The transparency of the plot
+    can be set with the ``--alpha`` option. The size of the markers is proportional to the
+    population of each district. The color of the markers is proportional to the median house
+    value of each district."""
+    config = Config()
+    housing = helpers.get_housing_data(config, download=True)
+    if housing is not None:
+        cmap = plt.get_cmap("jet")  # type: ignore
+        housing.plot(
+            kind="scatter",
+            x="longitude",
+            y="latitude",
+            alpha=alpha,
+            s=housing["population"] / 100,
+            label="population",
+            c="median_house_value",
+            cmap=cmap,
+            colorbar=True,
+            figsize=(10, 7),
+            sharex=False,
+            grid=True,
+        )
+        plt.legend()
         plt.show()  # type: ignore
