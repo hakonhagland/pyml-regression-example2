@@ -1,0 +1,398 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Introduction to Correlation &mdash; pyml-regression-example2 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Results" href="../results.html" />
+    <link rel="prev" title="Stratified sampling" href="stratified_sampling.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            pyml-regression-example2
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../theory.html">Theory</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="linear_regression.html">LinearRegression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="least_squares.html">Ordinary Least Squares</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stratified_sampling.html">Stratified sampling</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Introduction to Correlation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#random-variables">Random Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#expectation">Expectation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#covariance">Covariance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#connecting-covariance-to-correlation">Connecting Covariance to Correlation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pearsons-correlation-coefficient-population">Pearson’s Correlation Coefficient (Population)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#interpretation">Interpretation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#why-standardize-covariance">Why Standardize Covariance?</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#sample-correlation">Sample Correlation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sample-means">Sample Means</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sample-covariance">Sample Covariance</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#why-n-1-instead-of-n">Why <span class="math notranslate nohighlight">\(n-1\)</span> instead of <span class="math notranslate nohighlight">\(n\)</span>?</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#sample-variances">Sample Variances</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sample-pearsons-correlation-coefficient">Sample Pearson’s Correlation Coefficient</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Interpretation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../results.html">Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../todo.html">TODO</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyml-regression-example2</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../theory.html">Theory</a></li>
+      <li class="breadcrumb-item active">Introduction to Correlation</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/hakonhagland/pyml-regression-example2/blob/main/docs/theory/correlation.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="introduction-to-correlation">
+<h1>Introduction to Correlation<a class="headerlink" href="#introduction-to-correlation" title="Link to this heading"></a></h1>
+<p>When studying relationships between two variables, we often want to know
+if changes in one variable are associated with changes in the other.
+This idea is captured by the concept of <strong>correlation</strong>. Correlation gives
+us a way to describe how two variables move together—or fail to move together—
+in a population of interest.</p>
+<p>Imagine we consider the entire population of adults in a large country.
+We focus on two variables: their height and their weight. Intuitively,
+we might expect that taller individuals tend to be heavier. If we took
+the time to measure every adult’s height and weight (the population),
+we could then look at all these data points at once. On a scatter plot,
+each point would represent one person: their height on the horizontal axis
+and their weight on the vertical axis. If, as we move from shorter to taller
+individuals, we generally see weights increasing, we can say that there is
+a <strong>positive correlation</strong> between height and weight in this population.</p>
+<p>Of course, not every tall person is heavy, nor every short person light.
+But what matters is the overall trend across the entire population. If
+we observe this general pattern—taller often means heavier—then these two
+variables are positively correlated. Conversely, if we found a situation
+where increasing one variable is generally associated with a decrease in
+the other (imagine the relationship between how far you travel and how
+much time you have left in a fuel tank), we’d say there is a <strong>negative
+correlation</strong>.</p>
+<p>By starting with the entire population, we’re talking about a property of
+the “real world” as it exists. In practice, we rarely have the luxury
+of measuring every single individual. Instead, we often work with just
+a subset of the population, known as a <em>sample</em>. Later, we’ll discuss
+how we estimate correlation from a sample and how this relates to the
+“true” correlation of the entire population.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In more formal terms, correlation can be expressed mathematically,
+and its value is always between -1 and 1. A value close to +1
+indicates a strong positive relationship, near -1 indicates a strong
+negative relationship, and around 0 indicates little to no linear
+relationship. We’ll introduce these formal definitions, along with
+the concept of covariance and Pearson’s correlation coefficient, after
+we’ve built a solid intuitive understanding.</p>
+</div>
+<section id="random-variables">
+<h2>Random Variables<a class="headerlink" href="#random-variables" title="Link to this heading"></a></h2>
+<p>When we study statistics, we often deal with <em>random variables</em>. A random variable
+is simply a variable whose value results from some random process. For instance,
+if we randomly select an adult from a population, that person’s height (in cm)
+can be viewed as a random variable, which we might denote <span class="math notranslate nohighlight">\(X\)</span>.</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(X\)</span> takes on different values depending on which individual is selected.</p></li>
+<li><p>Similarly, a person’s weight (in kg) might be denoted <span class="math notranslate nohighlight">\(Y\)</span>, and it too
+changes from person to person.</p></li>
+</ul>
+<p>From a population perspective, you can think of <span class="math notranslate nohighlight">\(X\)</span> and <span class="math notranslate nohighlight">\(Y\)</span> as having
+a certain distribution across all individuals. We typically focus on their
+mean (average) values and other properties that describe how these variables
+fluctuate.</p>
+</section>
+<section id="expectation">
+<h2>Expectation<a class="headerlink" href="#expectation" title="Link to this heading"></a></h2>
+<p>The <em>expectation</em> or <em>expected value</em> of a random variable (often thought of as
+the <em>mean</em>) is denoted <span class="math notranslate nohighlight">\(E[X]\)</span>. Conceptually, if you could measure the height
+(<span class="math notranslate nohighlight">\(X\)</span>) of <em>every</em> person in the population or repeat your random selection
+many times, <span class="math notranslate nohighlight">\(E[X]\)</span> is the long-run average of those measurements.</p>
+<p>Mathematically, for a discrete random variable <span class="math notranslate nohighlight">\(X\)</span>, the expectation is:</p>
+<div class="math notranslate nohighlight">
+\[E[X] = \sum_{x} x \, P(X = x)\]</div>
+<p>For a continuous random variable, it’s given by an integral:</p>
+<div class="math notranslate nohighlight">
+\[E[X] = \int_{-\infty}^{\infty} x \, f_X(x) \, dx\]</div>
+<p>where <span class="math notranslate nohighlight">\(f_X(x)\)</span> is the probability density function (PDF) of <span class="math notranslate nohighlight">\(X\)</span>.</p>
+</section>
+<section id="covariance">
+<h2>Covariance<a class="headerlink" href="#covariance" title="Link to this heading"></a></h2>
+<p>Once we understand that each of <span class="math notranslate nohighlight">\(X\)</span> and <span class="math notranslate nohighlight">\(Y\)</span> has an expectation,
+we can measure how these two variables <em>co-vary</em>—that is, how they move together.
+The <strong>covariance</strong> of <span class="math notranslate nohighlight">\(X\)</span> and <span class="math notranslate nohighlight">\(Y\)</span>, denoted <span class="math notranslate nohighlight">\(\mathrm{Cov}(X, Y)\)</span>,
+is defined as the expected value of the product of their deviations from their
+means:</p>
+<div class="math notranslate nohighlight">
+\[\mathrm{Cov}(X, Y) = E\big[(X - E[X])(Y - E[Y])\big].\]</div>
+<p>Intuitively:</p>
+<ul class="simple">
+<li><p>If <span class="math notranslate nohighlight">\(X\)</span> and <span class="math notranslate nohighlight">\(Y\)</span> tend to increase and decrease together, the product
+<span class="math notranslate nohighlight">\((X - E[X])(Y - E[Y])\)</span> will often be positive, leading to a positive
+covariance.</p></li>
+<li><p>If one variable goes up when the other tends to go down, the product of their
+deviations will often be negative, leading to a negative covariance.</p></li>
+<li><p>If there’s no clear pattern in how they move together, the product of their
+deviations will roughly balance out over repeated observations, and the
+covariance will be close to zero.</p></li>
+</ul>
+</section>
+<section id="connecting-covariance-to-correlation">
+<h2>Connecting Covariance to Correlation<a class="headerlink" href="#connecting-covariance-to-correlation" title="Link to this heading"></a></h2>
+<p>While covariance tells us if two variables move together (positive covariance) or
+in opposite directions (negative covariance), its numerical value depends on the
+units of the original variables. For example, measuring height in centimeters vs.
+meters changes the scale of the covariance. This is why <strong>Pearson’s correlation
+coefficient</strong> becomes useful: it is the standardized version of covariance, always
+ranging between -1 and +1, thus making it easier to compare relationships across
+different variables and scales.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We’ll discuss Pearson’s correlation coefficient in more detail shortly, but
+remember that it’s defined as the covariance of <span class="math notranslate nohighlight">\(X\)</span> and <span class="math notranslate nohighlight">\(Y\)</span>, divided
+by the product of their standard deviations:</p>
+<div class="math notranslate nohighlight">
+\[\rho = \frac{\mathrm{Cov}(X, Y)}{\sqrt{\mathrm{Var}(X) \mathrm{Var}(Y)}}.\]</div>
+<p>Here, <span class="math notranslate nohighlight">\(\rho\)</span> is the population correlation, and it serves as a scale-invariant
+measure of linear association between the two variables.</p>
+</div>
+</section>
+</section>
+<section id="pearsons-correlation-coefficient-population">
+<h1>Pearson’s Correlation Coefficient (Population)<a class="headerlink" href="#pearsons-correlation-coefficient-population" title="Link to this heading"></a></h1>
+<p>Recall from the definition of <em>covariance</em> that for two random variables
+<span class="math notranslate nohighlight">\(X\)</span> and <span class="math notranslate nohighlight">\(Y\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\mathrm{Cov}(X, Y) = E\big[(X - E[X])(Y - E[Y])\big].\]</div>
+<p>We can also define the <em>variance</em> of a random variable <span class="math notranslate nohighlight">\(X\)</span> as:</p>
+<div class="math notranslate nohighlight">
+\[\mathrm{Var}(X) = E\big[(X - E[X])^2\big].\]</div>
+<p>The <strong>population Pearson’s correlation coefficient</strong>, denoted by
+<span class="math notranslate nohighlight">\(\rho(X, Y)\)</span> or simply <span class="math notranslate nohighlight">\(\rho\)</span>, standardizes covariance by
+dividing by the product of the variables’ standard deviations
+(<span class="math notranslate nohighlight">\(\sqrt{\mathrm{Var}(X)}\)</span> and <span class="math notranslate nohighlight">\(\sqrt{\mathrm{Var}(Y)}\)</span>):</p>
+<div class="math notranslate nohighlight">
+\[\rho(X, Y) \;=\; \frac{\mathrm{Cov}(X, Y)}
+                      {\sqrt{\mathrm{Var}(X)}\;\sqrt{\mathrm{Var}(Y)}}.\]</div>
+<p>Substituting the expectation-based definitions of covariance and variance,
+we can write:</p>
+<div class="math notranslate nohighlight">
+\[\rho(X, Y)
+\;=\; \frac{ E\big[(X - E[X])(Y - E[Y])\big] }
+            { \sqrt{ E\big[(X - E[X])^2\big] } \;\sqrt{ E\big[(Y - E[Y])^2\big] } }.\]</div>
+<section id="interpretation">
+<h2>Interpretation<a class="headerlink" href="#interpretation" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\rho(X, Y)\)</span> takes values in <span class="math notranslate nohighlight">\([-1, 1]\)</span>.</p></li>
+<li><p>A value of <span class="math notranslate nohighlight">\(+1\)</span> indicates a <em>perfect</em> positive linear relationship
+between <span class="math notranslate nohighlight">\(X\)</span> and <span class="math notranslate nohighlight">\(Y\)</span>.</p></li>
+<li><p>A value of <span class="math notranslate nohighlight">\(-1\)</span> indicates a <em>perfect</em> negative linear relationship.</p></li>
+<li><p>A value of <span class="math notranslate nohighlight">\(0\)</span> indicates <em>no</em> linear relationship. (Note that
+<span class="math notranslate nohighlight">\(X\)</span> and <span class="math notranslate nohighlight">\(Y\)</span> could still be related in a non-linear way.)</p></li>
+</ul>
+</section>
+<section id="why-standardize-covariance">
+<h2>Why Standardize Covariance?<a class="headerlink" href="#why-standardize-covariance" title="Link to this heading"></a></h2>
+<p>Covariance by itself can be hard to compare across different variable
+scales. For example, if you measure height in meters instead of centimeters,
+the covariance changes numerically—even though the <em>underlying</em> relationship
+has not. By dividing by the product of the standard deviations of <span class="math notranslate nohighlight">\(X\)</span>
+and <span class="math notranslate nohighlight">\(Y\)</span>, the Pearson correlation coefficient makes the result
+<em>dimensionless</em>, facilitating comparisons across different variables and
+datasets.</p>
+<p>In the next section, we’ll discuss how we estimate <span class="math notranslate nohighlight">\(\rho(X, Y)\)</span> with
+sample data, which is typically what we do in real-world scenarios.</p>
+</section>
+</section>
+<section id="sample-correlation">
+<h1>Sample Correlation<a class="headerlink" href="#sample-correlation" title="Link to this heading"></a></h1>
+<p>In practice, we often do not have access to every individual in a population.
+Instead, we collect data from a <em>sample</em> of size <span class="math notranslate nohighlight">\(n\)</span>. Suppose we have
+paired observations:</p>
+<div class="math notranslate nohighlight">
+\[\{(x_1, y_1), (x_2, y_2), \dots, (x_n, y_n)\}\]</div>
+<p>where <span class="math notranslate nohighlight">\(x_i\)</span> might represent the height of the <span class="math notranslate nohighlight">\(i\)</span>-th individual
+in your sample, and <span class="math notranslate nohighlight">\(y_i\)</span> might represent their weight.</p>
+<p>Just as we defined <em>population covariance</em> and <em>population correlation</em>
+in terms of expectations, we define <em>sample</em> versions by replacing
+expectations with <em>sample means</em> (averages), and by summing over the finite
+set of sampled data points.</p>
+<section id="sample-means">
+<h2>Sample Means<a class="headerlink" href="#sample-means" title="Link to this heading"></a></h2>
+<p>The sample mean of the <span class="math notranslate nohighlight">\(x\)</span> values is:</p>
+<div class="math notranslate nohighlight">
+\[\bar{x} \;=\; \frac{1}{n} \sum_{i=1}^{n} x_i,\]</div>
+<p>and similarly, the sample mean of the <span class="math notranslate nohighlight">\(y\)</span> values is:</p>
+<div class="math notranslate nohighlight">
+\[\bar{y} \;=\; \frac{1}{n} \sum_{i=1}^{n} y_i.\]</div>
+</section>
+<section id="sample-covariance">
+<h2>Sample Covariance<a class="headerlink" href="#sample-covariance" title="Link to this heading"></a></h2>
+<p>Recall that population covariance is defined by</p>
+<div class="math notranslate nohighlight">
+\[\mathrm{Cov}(X, Y)
+= E\big[ (X - E[X])(Y - E[Y]) \big].\]</div>
+<p>In the sample context, we approximate the expectation <span class="math notranslate nohighlight">\(E[\cdot]\)</span>
+by averaging over our sampled data points. Therefore, the <strong>sample covariance</strong>
+of <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span>, denoted by <span class="math notranslate nohighlight">\(\widehat{\mathrm{Cov}}(x, y)\)</span>, is:</p>
+<div class="math notranslate nohighlight">
+\[\widehat{\mathrm{Cov}}(x, y)
+\;=\; \frac{1}{n - 1} \sum_{i=1}^{n}
+      (x_i - \bar{x}) \,(y_i - \bar{y}).\]</div>
+<section id="why-n-1-instead-of-n">
+<h3>Why <span class="math notranslate nohighlight">\(n-1\)</span> instead of <span class="math notranslate nohighlight">\(n\)</span>?<a class="headerlink" href="#why-n-1-instead-of-n" title="Link to this heading"></a></h3>
+<p>Statisticians use <span class="math notranslate nohighlight">\(n-1\)</span> in the denominator to make
+<span class="math notranslate nohighlight">\(\widehat{\mathrm{Cov}}\)</span> (and likewise the sample variance) an
+<em>unbiased</em> estimator of the true population covariance. This detail stems
+from more advanced probability theory, but intuitively, using <span class="math notranslate nohighlight">\(n\)</span>
+would systematically <em>underestimate</em> the variability in the sample.</p>
+</section>
+</section>
+<section id="sample-variances">
+<h2>Sample Variances<a class="headerlink" href="#sample-variances" title="Link to this heading"></a></h2>
+<p>Likewise, we approximate each variable’s variance by</p>
+<div class="math notranslate nohighlight">
+\[\widehat{\mathrm{Var}}(x)
+\;=\; \frac{1}{n - 1} \sum_{i=1}^{n} (x_i - \bar{x})^2,\]</div>
+<div class="math notranslate nohighlight">
+\[\widehat{\mathrm{Var}}(y)
+\;=\; \frac{1}{n - 1} \sum_{i=1}^{n} (y_i - \bar{y})^2.\]</div>
+</section>
+<section id="sample-pearsons-correlation-coefficient">
+<h2>Sample Pearson’s Correlation Coefficient<a class="headerlink" href="#sample-pearsons-correlation-coefficient" title="Link to this heading"></a></h2>
+<p>By analogy with the population correlation</p>
+<div class="math notranslate nohighlight">
+\[\rho(X, Y)
+\;=\; \frac{\mathrm{Cov}(X, Y)}
+            {\sqrt{\mathrm{Var}(X) \,\mathrm{Var}(Y)}},\]</div>
+<p>we define the <strong>sample correlation</strong> coefficient, denoted by <span class="math notranslate nohighlight">\(r\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[r
+\;=\; \frac{\widehat{\mathrm{Cov}}(x, y)}
+            {\sqrt{\widehat{\mathrm{Var}}(x)} \,\sqrt{\widehat{\mathrm{Var}}(y)}}.\]</div>
+<p>Substituting the definitions of sample covariance and variance, this becomes:</p>
+<div class="math notranslate nohighlight">
+\[r
+\;=\; \frac{\frac{1}{n-1}\,\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}
+            {\sqrt{\frac{1}{n-1}\,\sum_{i=1}^{n} (x_i - \bar{x})^2}
+             \;\sqrt{\frac{1}{n-1}\,\sum_{i=1}^{n} (y_i - \bar{y})^2}}.\]</div>
+<p>Notice that the factor of <span class="math notranslate nohighlight">\(1/(n-1)\)</span> appears in both numerator and denominator
+and effectively cancels in the fraction. Hence, you’ll often see the sample
+correlation coefficient written as:</p>
+<div class="math notranslate nohighlight">
+\[r
+= \frac{\sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})}
+        {\sqrt{\sum_{i=1}^{n} (x_i - \bar{x})^2}\,
+         \sqrt{\sum_{i=1}^{n} (y_i - \bar{y})^2}}.\]</div>
+</section>
+<section id="id1">
+<h2>Interpretation<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><span class="math notranslate nohighlight">\(r\)</span> always lies between -1 and +1, just like the population correlation
+<span class="math notranslate nohighlight">\(\rho\)</span>.</p></li>
+<li><p>A value close to +1 indicates a strong positive linear relationship; close to
+-1 indicates a strong negative linear relationship; and values near 0 suggest
+little to no <em>linear</em> relationship between <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> in the sample.</p></li>
+<li><p>Keep in mind that this is an <em>estimate</em> based on the sample: the true population
+correlation might be slightly (or drastically) different.</p></li>
+</ol>
+<p>In summary, the sample correlation coefficient is <em>conceptually the same measure</em>
+as the population correlation—how two variables vary together, standardized by
+their respective variances—but uses the sample data’s deviations from their own
+means as a stand-in for the true (and often unknown) population parameter.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="stratified_sampling.html" class="btn btn-neutral float-left" title="Stratified sampling" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../results.html" class="btn btn-neutral float-right" title="Results" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Håkon Hægland.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
