@@ -26,8 +26,9 @@ ruff-fix:
 ruff-format:
 	ruff format src tests
 
+# NOTE: to avoid rstcheck to fail on info-level messages, we set the report-level to WARNING
 rstcheck:
-	rstcheck -r docs/
+	rstcheck --report-level=WARNING -r docs/
 
 publish-to-pypi:
 	uv build

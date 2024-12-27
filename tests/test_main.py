@@ -252,3 +252,28 @@ class TestPlotScatterCmd:
             label="population",
             grid=True,
         )
+
+
+class TestCorrelationInfoCmd:
+    @pytest.mark.parametrize("invalid_column", [False, True])
+    def test_invoke(
+        self,
+        invalid_column: bool,
+        caplog: LogCaptureFixture,
+        prepare_config_dir: PrepareConfigDir,
+        prepare_data_dir: PrepareDataDir,
+    ) -> None:
+        caplog.set_level(logging.INFO)
+        prepare_data_dir(datafiles_exists=True, housing_csv=True)
+        prepare_config_dir(add_config_ini=True)
+        runner = CliRunner()
+        args = ["correlation-info"]
+        if invalid_column:
+            args.append("bad_column")
+        else:
+            args.append("median_house_value")
+        result = runner.invoke(main.main, args)
+        if invalid_column:
+            assert caplog.records[-1].message.startswith("Invalid column name")
+        else:
+            assert result.exit_code == 0

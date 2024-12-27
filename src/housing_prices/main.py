@@ -297,3 +297,20 @@ def plot_scatter(alpha: float) -> None:
         )
         plt.legend()
         plt.show()  # type: ignore
+
+
+@main.command(cls=click_command_cls)
+@click.argument("column-name", type=str)
+def correlation_info(column_name: str) -> None:
+    """``housing-prices correlation-info`` prints the correlation information about a specific column. See ``housing-prices info`` for information about the housing price column names."""
+    config = Config()
+    housing = helpers.get_housing_data(config, download=True)
+    if housing is not None:
+        # Check if the column name is valid
+        if column_name not in housing.columns:
+            logging.error(
+                f"Invalid column name '{column_name}'. Valid column names are: {housing.columns}"
+            )
+            return
+        corr_matrix = housing.select_dtypes(include=["number"]).corr()
+        print(corr_matrix[column_name].sort_values(ascending=False))
