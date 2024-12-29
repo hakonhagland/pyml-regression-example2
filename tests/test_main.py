@@ -220,9 +220,15 @@ class TestStratifyColumnCmd:
             assert result.exit_code == 0
 
 
-class TestPlotScatterCmd:
+class TestGeoPopScatterCmd:
+    @pytest.mark.parametrize(
+        "invalid_colname1,invalid_colname2",
+        [[False, False], [True, False], [False, True]],
+    )
     def test_invoke(
         self,
+        invalid_colname1: bool,
+        invalid_colname2: bool,
         caplog: LogCaptureFixture,
         mocker: MockerFixture,
         prepare_config_dir: PrepareConfigDir,
@@ -235,23 +241,32 @@ class TestPlotScatterCmd:
         mocker.patch("matplotlib.pyplot.show", return_value=None)
         matplotlib.use("Agg")
         runner = CliRunner()
-        args = ["plot-scatter", "--alpha", "0.1"]
+        args = ["geo-pop-scatter", "--alpha", "0.1"]
+        if invalid_colname1:
+            args.extend(["--column-name", "latitude"])
+        elif invalid_colname2:
+            args.extend(["--column-name", "bad_column"])
         result = runner.invoke(main.main, args)
-        assert result.exit_code == 0
-        mock_plot.assert_called_once_with(
-            kind="scatter",
-            x="longitude",
-            y="latitude",
-            alpha=0.1,
-            s=unittest.mock.ANY,
-            figsize=(10, 7),
-            c="median_house_value",
-            cmap=unittest.mock.ANY,
-            colorbar=True,
-            sharex=False,
-            label="population",
-            grid=True,
-        )
+        if invalid_colname1:
+            assert caplog.records[-1].message.startswith("Invalid column name")
+        elif invalid_colname2:
+            assert caplog.records[-1].message.startswith("Invalid column name")
+        else:
+            assert result.exit_code == 0
+            mock_plot.assert_called_once_with(
+                kind="scatter",
+                x="longitude",
+                y="latitude",
+                alpha=0.1,
+                s=unittest.mock.ANY,
+                figsize=(10, 7),
+                c="median_house_value",
+                cmap=unittest.mock.ANY,
+                colorbar=True,
+                sharex=False,
+                label="population",
+                grid=True,
+            )
 
 
 class TestCorrelationInfoCmd:
@@ -277,3 +292,83 @@ class TestCorrelationInfoCmd:
             assert caplog.records[-1].message.startswith("Invalid column name")
         else:
             assert result.exit_code == 0
+
+
+class TestScatterPlotCmd:
+    @pytest.mark.parametrize(
+        "cols_too_few,cols_duplicate,cols_invalid",
+        [
+            [False, False, False],
+            [True, False, False],
+            [False, True, False],
+            [False, False, True],
+        ],
+    )
+    def test_invoke1(
+        self,
+        cols_too_few: bool,
+        cols_duplicate: bool,
+        cols_invalid: bool,
+        caplog: LogCaptureFixture,
+        mocker: MockerFixture,
+        prepare_config_dir: PrepareConfigDir,
+        prepare_data_dir: PrepareDataDir,
+    ) -> None:
+        caplog.set_level(logging.INFO)
+        prepare_data_dir(datafiles_exists=True, housing_csv=True)
+        prepare_config_dir(add_config_ini=True)
+        mock_plot = mocker.patch.object(pd.DataFrame, "plot")
+        mocker.patch("matplotlib.pyplot.show", return_value=None)
+        matplotlib.use("Agg")
+        runner = CliRunner()
+        args = ["scatter-plot"]
+        if cols_too_few:
+            args.append("median_income")
+        elif cols_duplicate:
+            args.append("median_income,median_income")
+        elif cols_invalid:
+            args.append("bad_column,median_house_value")
+        else:
+            args.append("median_income,median_house_value")
+        result = runner.invoke(main.main, args)
+        assert result.exit_code == 0
+        if cols_too_few:
+            assert caplog.records[-1].message.startswith("At least two column names")
+        elif cols_duplicate:
+            assert caplog.records[-1].message.startswith("Duplicate column names")
+        elif cols_invalid:
+            assert caplog.records[-1].message.startswith("Invalid column name")
+        else:
+            mock_plot.assert_called_once_with(
+                kind="scatter",
+                x="median_income",
+                y="median_house_value",
+                alpha=0.1,
+                grid=True,
+            )
+
+    def test_invoke2(
+        self,
+        caplog: LogCaptureFixture,
+        mocker: MockerFixture,
+        prepare_config_dir: PrepareConfigDir,
+        prepare_data_dir: PrepareDataDir,
+    ) -> None:
+        caplog.set_level(logging.INFO)
+        prepare_data_dir(datafiles_exists=True, housing_csv=True)
+        prepare_config_dir(add_config_ini=True)
+        mock_plot = mocker.patch("housing_prices.main.scatter_matrix")
+        mocker.patch("matplotlib.pyplot.show", return_value=None)
+        matplotlib.use("Agg")
+        runner = CliRunner()
+        args = [
+            "scatter-plot",
+            "median_house_value,median_income,total_rooms,housing_median_age",
+        ]
+        result = runner.invoke(main.main, args)
+        assert result.exit_code == 0
+        mock_plot.assert_called_once_with(
+            unittest.mock.ANY,
+            figsize=(12, 8),
+            grid=True,
+        )

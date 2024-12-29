@@ -17,6 +17,12 @@ def validate_bins(
         )
 
 
+def validate_column_names(
+    ctx: click.Context, param: Union[click.Option, click.Parameter], value: str
+) -> list[str]:
+    return value.split(",")
+
+
 def validate_test_set_gen_method(
     ctx: click.Context, param: Union[click.Option, click.Parameter], value: str
 ) -> TestSetGenMethod:

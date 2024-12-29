@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from pandas.plotting import scatter_matrix
+
 # import plotly.graph_objects as go
 from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
 
@@ -55,17 +57,19 @@ def main(ctx: click.Context, verbose: bool) -> None:
 
     The following subcommands are available:
 
+    * ``correlation-info``: Print the correlation information about a specific column.
+
     * ``create-test-set`` : Create a test set from the housing price data.
 
     * ``describe-column`` : Print information about a specific column in the housing price data.
 
     * ``download-data``   : Download the housing price data from the book's web page.
 
+    * ``geo-pop-scatter`` : Plot a scatter plot of 4 of the attributes of the housing price data.
+
     * ``info``            : Print information about the housing price data.
 
     * ``plot-histograms`` : Plot histograms of the housing price data.
-
-    * ``plot-scatter``    : Plot a scatter plot of the housing price data.
 
     * ``stratify-column`` : Stratify the data in a column of the housing price data.
 
@@ -271,15 +275,35 @@ def stratify_column(column_name: str, bins: list[float]) -> None:
 @click.option(
     "alpha", "--alpha", type=float, default=1.0, help="The transparency of the plot"
 )
-def plot_scatter(alpha: float) -> None:
-    """``housing-prices plot-scatter`` plots a scatter plot visualizing the population of
-    each district and the median house value of each district. The transparency of the plot
-    can be set with the ``--alpha`` option. The size of the markers is proportional to the
-    population of each district. The color of the markers is proportional to the median house
-    value of each district."""
+@click.option(
+    "column_name",
+    "--column-name",
+    default="median_house_value",
+    type=str,
+    help="The column name to plot",
+)
+def geo_pop_scatter(alpha: float, column_name: str) -> None:
+    """``housing-prices geo-pop-scatter`` plots a scatter plot visualizing the geographical
+    location and the population size of each data point in the housing price data. In addition,
+    a fourth dimension is added to the plot by using the color of the markers to represent the
+    median house value (default) or another column specified with the ``--column-name`` option.
+    The transparency of the plot can be set with the ``--alpha`` option.
+    The size of the markers is proportional to the population of each district."""
     config = Config()
     housing = helpers.get_housing_data(config, download=True)
     if housing is not None:
+        if column_name in ["longitude", "latitude", "population"]:
+            logging.error(
+                f"Invalid column name '{column_name}'. Columns 'longitude', 'latitude', and 'population' "
+                "are implicit in the plot and cannot be used."
+            )
+            return
+        elif column_name not in housing.columns:
+            logging.error(
+                f"Invalid column name '{column_name}'. Please see the 'housing-prices info' command for "
+                "valid column names."
+            )
+            return
         cmap = plt.get_cmap("jet")  # type: ignore
         housing.plot(
             kind="scatter",
@@ -288,7 +312,7 @@ def plot_scatter(alpha: float) -> None:
             alpha=alpha,
             s=housing["population"] / 100,
             label="population",
-            c="median_house_value",
+            c=column_name,
             cmap=cmap,
             colorbar=True,
             figsize=(10, 7),
@@ -314,3 +338,40 @@ def correlation_info(column_name: str) -> None:
             return
         corr_matrix = housing.select_dtypes(include=["number"]).corr()
         print(corr_matrix[column_name].sort_values(ascending=False))
+
+
+@main.command(cls=click_command_cls)
+@click.argument("column_names", type=str, callback=click_helpers.validate_column_names)
+def scatter_plot(column_names: list[str]) -> None:
+    """``housing-prices scatter_plot`` plots a scatter plot or a matrix of scatter plots
+    of the housing price data. The ``column_names`` argument is a comma-separated list of column
+    names to plot. If only two column names are given, a single scatter plot is created. If more
+    than two column names are given, a matrix of scatter plots is created. See
+    ``housing-prices info`` for information about the housing price column names. Example:
+    ``housing-prices scatter_plot median_house_value,median_income``"""
+
+    config = Config()
+    housing = helpers.get_housing_data(config, download=True)
+    if housing is not None:
+        if len(column_names) < 2:
+            logging.error("At least two column names must be given.")
+            return
+        elif len(set(column_names)) < len(column_names):
+            logging.error("Duplicate column names are not allowed.")
+            return
+        elif not all(col in housing.columns for col in column_names):
+            logging.error(
+                f"Invalid column name. Valid column names are: {housing.columns}"
+            )
+            return
+        if len(column_names) == 2:
+            housing.plot(
+                kind="scatter",
+                x=column_names[0],
+                y=column_names[1],
+                alpha=0.1,
+                grid=True,
+            )
+        else:
+            scatter_matrix(housing[column_names], figsize=(12, 8), grid=True)
+        plt.show()  # type: ignore
