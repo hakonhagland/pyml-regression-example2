@@ -106,15 +106,23 @@ class Config:
         data_file = Path(datadir) / FileNames.housing_csv
         return data_file
 
-    def get_stratified_column_bin_filename(self, column_name: str) -> Path:
-        dir_ = self.get_stratified_column_dir(column_name)
-        filename = dir_ / FileNames.bins_txt
-        return filename
+    def get_imputed_data_csv_filename(self, strategy: str) -> Path:
+        datadir: Path = self.get_data_dir()
+        dir_ = datadir / Directories.imputed
+        if not dir_.exists():
+            dir_.mkdir(parents=True)
+        csv_file = dir_ / f"{strategy}.csv"
+        return csv_file
 
     def get_stratified_column_csv_filename(self, column_name: str) -> Path:
         dir_ = self.get_stratified_column_dir(column_name)
         csv_file = dir_ / FileNames.column_csv
         return csv_file
+
+    def get_stratified_column_bin_filename(self, column_name: str) -> Path:
+        dir_ = self.get_stratified_column_dir(column_name)
+        filename = dir_ / FileNames.bins_txt
+        return filename
 
     def get_stratified_column_dir(self, column_name: str) -> Path:
         datadir: Path = self.get_data_dir()

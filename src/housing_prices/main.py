@@ -17,7 +17,7 @@ from pandas.plotting import scatter_matrix
 from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
 
 from housing_prices.config import Config
-from housing_prices.constants import TestSetGenMethod
+from housing_prices.constants import ImputerStrategy, TestSetGenMethod
 from housing_prices.split_data import SplitCrc, SplitStratified
 from housing_prices import click_helpers, helpers
 
@@ -375,3 +375,22 @@ def scatter_plot(column_names: list[str]) -> None:
         else:
             scatter_matrix(housing[column_names], figsize=(12, 8), grid=True)
         plt.show()  # type: ignore
+
+
+@main.command(cls=click_command_cls)
+@click.option(
+    "strategy",
+    "--strategy",
+    type=str,
+    callback=click_helpers.validate_imputer_strategy,
+    default="median",
+    help="The strategy to fill missing values. Possible values are 'mean', 'median', and 'most_frequent'. Default is 'median'.",
+)
+def apply_imputer(strategy: ImputerStrategy) -> None:
+    """``housing-prices apply-imputer`` applies the imputer to the housing price data
+    to fill missing values."""
+    config = Config()
+    housing = helpers.get_housing_data(config, download=True)
+    if housing is not None:
+        housing_imputed = helpers.apply_imputer(housing, strategy)
+        helpers.save_imputed_data(config, housing_imputed, strategy)

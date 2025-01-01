@@ -4,11 +4,34 @@ import shutil
 import tarfile
 import zlib
 
+import sklearn  # type: ignore
+
 import numpy as np
 import pandas as pd
 from pathlib import Path
+
+import sklearn.impute  # type: ignore
 from housing_prices.config import Config
-from housing_prices.constants import FileNames
+from housing_prices.constants import FileNames, ImputerStrategy
+
+
+def apply_imputer(data: pd.DataFrame, strategy: ImputerStrategy) -> pd.DataFrame:
+    """Impute missing values in the DataFrame using the specified strategy."""
+
+    # Only consider numeric columns, i.e. skip the ocean_proximity column
+    numeric_data = data.select_dtypes(include=[np.number])
+    imputer = sklearn.impute.SimpleImputer(strategy=strategy.value)
+    imputer.fit(numeric_data)
+    # NOTE: Since the imputer.transform() method returns a numpy array, we need to
+    #       convert it back to a DataFrame with the original column names and index
+    logging.info(f"Imputing missing values using strategy: {strategy.value}")
+    logging.info(f"Imputing on columns: {numeric_data.columns}")
+    logging.info(f"Imputer statistics: {imputer.statistics_}")
+    return pd.DataFrame(
+        imputer.transform(numeric_data),
+        columns=numeric_data.columns,
+        index=numeric_data.index,
+    )
 
 
 def download_data(datadir: Path) -> None:
@@ -112,6 +135,14 @@ def read_stratified_column_bins(config: Config, column_name: str) -> list[float]
     with open(bin_file, "r") as f:
         bins = [float(line.strip()) for line in f]
     return bins
+
+
+def save_imputed_data(
+    config: Config, data: pd.DataFrame, strategy: ImputerStrategy
+) -> None:
+    imputed_file = config.get_imputed_data_csv_filename(strategy.value)
+    data.to_csv(imputed_file, index=False)
+    logging.info(f"Imputed data saved to {imputed_file}")
 
 
 def save_stratified_column(

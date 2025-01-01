@@ -1,4 +1,4 @@
-from housing_prices.constants import TestSetGenMethod
+from housing_prices.constants import ImputerStrategy, TestSetGenMethod
 from typing import Union
 import click
 
@@ -21,6 +21,20 @@ def validate_column_names(
     ctx: click.Context, param: Union[click.Option, click.Parameter], value: str
 ) -> list[str]:
     return value.split(",")
+
+
+def validate_imputer_strategy(
+    ctx: click.Context, param: Union[click.Option, click.Parameter], value: str
+) -> ImputerStrategy:
+    value = value.upper()
+    if value in ImputerStrategy.keys():
+        return ImputerStrategy[value]
+    values = ", ".join(list(ImputerStrategy.values()))
+    keys = ", ".join(list(ImputerStrategy.keys()))
+    raise click.BadParameter(
+        f"Invalid imputation strategy value '{value}'. Must be one of: {values}. "
+        f"Or alternatively, use the lower case names: {keys}."
+    )
 
 
 def validate_test_set_gen_method(

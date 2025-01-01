@@ -372,3 +372,28 @@ class TestScatterPlotCmd:
             figsize=(12, 8),
             grid=True,
         )
+
+
+class TestApplyImputerCmd:
+    @pytest.mark.parametrize("bad_strategy", [False, True])
+    def test_invoke(
+        self,
+        bad_strategy: bool,
+        caplog: LogCaptureFixture,
+        prepare_config_dir: PrepareConfigDir,
+        prepare_data_dir: PrepareDataDir,
+    ) -> None:
+        caplog.set_level(logging.INFO)
+        prepare_data_dir(datafiles_exists=True, housing_csv=True)
+        prepare_config_dir(add_config_ini=True)
+        runner = CliRunner()
+        args = ["apply-imputer", "--strategy"]
+        if bad_strategy:
+            args.append("bad_strategy")
+        else:
+            args.append("mean")
+        result = runner.invoke(main.main, args)
+        if bad_strategy:
+            assert result.stdout.startswith("Usage: main apply-imputer")
+        else:
+            assert result.exit_code == 0
