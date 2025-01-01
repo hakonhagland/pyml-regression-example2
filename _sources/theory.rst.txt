@@ -8,6 +8,7 @@ Theory
    theory/least_squares
    theory/stratified_sampling
    theory/correlation
+   theory/median
 
 See the sections below for more information on the theory behind the models and methods used in
 ``sklearn`` for `linear regressions <https://scikit-learn.org/stable/modules/linear_model.html>`__.
@@ -16,3 +17,4 @@ See the sections below for more information on the theory behind the models and 
 * :doc:`least squares <theory/least_squares>`.
 * :doc:`stratified sampling <theory/stratified_sampling>`.
 * :doc:`correlation <theory/correlation>`.
+* :doc:`median <theory/median>`.

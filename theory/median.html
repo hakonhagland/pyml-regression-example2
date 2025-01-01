@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LinearRegression &mdash; pyml-regression-example2 0.1 documentation</title>
+  <title>Median &mdash; pyml-regression-example2 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
@@ -20,8 +20,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Ordinary Least Squares" href="least_squares.html" />
-    <link rel="prev" title="Theory" href="../theory.html" /> 
+    <link rel="next" title="Results" href="../results.html" />
+    <link rel="prev" title="Introduction to Correlation" href="correlation.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -49,13 +49,13 @@
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../theory.html">Theory</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">LinearRegression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear_regression.html">LinearRegression</a></li>
 <li class="toctree-l2"><a class="reference internal" href="least_squares.html">Ordinary Least Squares</a></li>
 <li class="toctree-l2"><a class="reference internal" href="stratified_sampling.html">Stratified sampling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="correlation.html">Introduction to Correlation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="correlation.html#pearsons-correlation-coefficient-population">Pearson’s Correlation Coefficient (Population)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="correlation.html#sample-correlation">Sample Correlation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="median.html">Median</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Median</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../results.html">Results</a></li>
@@ -78,9 +78,9 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../theory.html">Theory</a></li>
-      <li class="breadcrumb-item active">LinearRegression</li>
+      <li class="breadcrumb-item active">Median</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/hakonhagland/pyml-regression-example2/blob/main/docs/theory/linear_regression.rst" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/hakonhagland/pyml-regression-example2/blob/main/docs/theory/median.rst" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -88,27 +88,21 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="linearregression">
-<h1>LinearRegression<a class="headerlink" href="#linearregression" title="Link to this heading"></a></h1>
-<p>The <code class="docutils literal notranslate"><span class="pre">sklearn.linear_model.LinearRegression.fit()</span></code> method is the most common method used to fit a
-linear regression model. It is implemented as an
-<a class="reference external" href="https://en.wikipedia.org/wiki/Ordinary_least_squares">Ordinary Least Squares method</a>
-and wrapped as a predictor object. See <a class="reference internal" href="least_squares.html"><span class="doc">Least Squares</span></a> for
-more information about the least squares method.</p>
-<p><a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html#sklearn.linear_model.LinearRegression">LinearRegression</a>
-fits a linear model with coefficients <span class="math notranslate nohighlight">\(w = (w_1, ..., w_p)\)</span>
-to minimize the residual sum of squares between the observed targets in the dataset, and the targets
-predicted by the linear approximation. Mathematically it solves a problem of the form:</p>
+  <section id="median">
+<h1>Median<a class="headerlink" href="#median" title="Link to this heading"></a></h1>
+<p>The median is a core measure of central tendency that splits a sorted dataset into two equal parts. To determine the median, first arrange all observations in ascending order. If the number of observations <span class="math notranslate nohighlight">\(n\)</span> is odd, the median is simply the middle value. For example, in <span class="math notranslate nohighlight">\(\{3, 1, 9, 7, 2\}\)</span>, sorting yields <span class="math notranslate nohighlight">\(\{1, 2, 3, 7, 9\}\)</span>, and the median is <span class="math notranslate nohighlight">\(3\)</span>. If <span class="math notranslate nohighlight">\(n\)</span> is even, the median is the average of the two central values. For instance, in <span class="math notranslate nohighlight">\(\{4, 8, 6, 2\}\)</span>, sorting gives <span class="math notranslate nohighlight">\(\{2, 4, 6, 8\}\)</span>, and the median is <span class="math notranslate nohighlight">\((4 + 6)/2 = 5\)</span>.</p>
+<p>Mathematically, if <span class="math notranslate nohighlight">\(x_1 \le x_2 \le \dots \le x_n\)</span> are the sorted data:</p>
 <div class="math notranslate nohighlight">
-\[\min_w ||Xw - y||^2_2\]</div>
+\[\text{Median} = \begin{cases} x_{\frac{n+1}{2}}, &amp; \text{if } n \text{ is odd}, \ \frac{x_{\frac{n}{2}} + x_{\frac{n}{2}+1}}{2}, &amp; \text{if } n \text{ is even}. \end{cases}\]</div>
+<p>Because the median resists the influence of extreme values, it is especially helpful when analyzing skewed datasets.</p>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../theory.html" class="btn btn-neutral float-left" title="Theory" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="least_squares.html" class="btn btn-neutral float-right" title="Ordinary Least Squares" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="correlation.html" class="btn btn-neutral float-left" title="Introduction to Correlation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../results.html" class="btn btn-neutral float-right" title="Results" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
