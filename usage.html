@@ -56,6 +56,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#housing-prices-download-data">download-data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#housing-prices-geo-pop-scatter">geo-pop-scatter</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#housing-prices-info">info</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#housing-prices-one-hot-encode">one-hot-encode</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#housing-prices-plot-histograms">plot-histograms</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#housing-prices-scatter-plot">scatter-plot</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#housing-prices-stratify-column">stratify-column</a></li>
@@ -112,12 +113,14 @@
 <a class="reference external" href="https://github.com/ageron/handson-ml3">Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow (3rd ed.)</a>.</p>
 <p>The following subcommands are available:</p>
 <ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">apply-imputer</span></code>   : Apply the imputer to the housing price data to fill missing values.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">correlation-info</span></code>: Print the correlation information about a specific column.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">create-test-set</span></code> : Create a test set from the housing price data.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">describe-column</span></code> : Print information about a specific column in the housing price data.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">download-data</span></code>   : Download the housing price data from the book’s web page.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">geo-pop-scatter</span></code> : Plot a scatter plot of 4 of the attributes of the housing price data.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">info</span></code>            : Print information about the housing price data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">one-hot-encode</span></code>  : Apply one-hot encoding to a column of the housing price data.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">plot-histograms</span></code> : Plot histograms of the housing price data.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">stratify-column</span></code> : Stratify the data in a column of the housing price data.</p></li>
 </ul>
@@ -249,6 +252,20 @@ The size of the markers is proportional to the population of each district.</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>housing-prices<span class="w"> </span>info<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
 </pre></div>
 </div>
+</section>
+<section id="housing-prices-one-hot-encode">
+<h4>one-hot-encode<a class="headerlink" href="#housing-prices-one-hot-encode" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">housing-prices</span> <span class="pre">one-hot-encode</span></code> applies one-hot encoding to a column of the housing price data.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>housing-prices<span class="w"> </span>one-hot-encode<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-housing-prices-one-hot-encode-column-name">
+<span class="sig-name descname"><span class="pre">--column-name</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;column_name&gt;</span></span><a class="headerlink" href="#cmdoption-housing-prices-one-hot-encode-column-name" title="Link to this definition"></a></dt>
+<dd><p>The column name to one-hot encode. Default is ‘ocean_proximity’.</p>
+</dd></dl>
+
 </section>
 <section id="housing-prices-plot-histograms">
 <h4>plot-histograms<a class="headerlink" href="#housing-prices-plot-histograms" title="Link to this heading"></a></h4>
