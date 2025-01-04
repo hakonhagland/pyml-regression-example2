@@ -11,6 +11,7 @@ import pandas as pd
 from pathlib import Path
 
 import sklearn.impute  # type: ignore
+import sklearn.preprocessing  # type: ignore
 from housing_prices.config import Config
 from housing_prices.constants import FileNames, ImputerStrategy
 
@@ -128,6 +129,18 @@ def get_housing_data(config: Config, download: bool = True) -> pd.DataFrame | No
     return pd.read_csv(data_file)
 
 
+def one_hot_encode(data: pd.DataFrame) -> pd.DataFrame:
+    """One-hot encode the data in the specified column."""
+    encoder = sklearn.preprocessing.OneHotEncoder()
+    encoded_data = encoder.fit_transform(data)
+    # Convert to DataFrame and set the column names
+    return pd.DataFrame(
+        encoded_data.toarray(),
+        columns=encoder.get_feature_names_out(data.columns),
+        index=data.index,
+    )
+
+
 def read_stratified_column_bins(config: Config, column_name: str) -> list[float]:
     bin_file = config.get_stratified_column_bin_filename(column_name)
     if not bin_file.exists():
@@ -143,6 +156,14 @@ def save_imputed_data(
     imputed_file = config.get_imputed_data_csv_filename(strategy.value)
     data.to_csv(imputed_file, index=False)
     logging.info(f"Imputed data saved to {imputed_file}")
+
+
+def save_one_hot_encoded_data(
+    config: Config, data: pd.DataFrame, column_name: str
+) -> None:
+    encoded_file = config.get_one_hot_encoded_csv_filename(column_name)
+    data.to_csv(encoded_file, index=False)
+    logging.info(f"One-hot encoded data saved to {encoded_file}")
 
 
 def save_stratified_column(

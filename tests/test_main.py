@@ -397,3 +397,28 @@ class TestApplyImputerCmd:
             assert result.stdout.startswith("Usage: main apply-imputer")
         else:
             assert result.exit_code == 0
+
+
+class TestOneHotEncodeCmd:
+    @pytest.mark.parametrize("bad_column_name", [False, True])
+    def test_invoke(
+        self,
+        bad_column_name: bool,
+        caplog: LogCaptureFixture,
+        prepare_config_dir: PrepareConfigDir,
+        prepare_data_dir: PrepareDataDir,
+    ) -> None:
+        caplog.set_level(logging.INFO)
+        prepare_data_dir(datafiles_exists=True, housing_csv=True)
+        prepare_config_dir(add_config_ini=True)
+        runner = CliRunner()
+        args = ["one-hot-encode", "--column-name"]
+        if bad_column_name:
+            args.append("bad_column")
+        else:
+            args.append("ocean_proximity")
+        result = runner.invoke(main.main, args)
+        if bad_column_name:
+            assert caplog.records[-1].message.startswith("Invalid column name")
+        else:
+            assert result.exit_code == 0

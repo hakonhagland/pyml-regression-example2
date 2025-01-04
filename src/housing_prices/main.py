@@ -57,6 +57,8 @@ def main(ctx: click.Context, verbose: bool) -> None:
 
     The following subcommands are available:
 
+    * ``apply-imputer``   : Apply the imputer to the housing price data to fill missing values.
+
     * ``correlation-info``: Print the correlation information about a specific column.
 
     * ``create-test-set`` : Create a test set from the housing price data.
@@ -68,6 +70,8 @@ def main(ctx: click.Context, verbose: bool) -> None:
     * ``geo-pop-scatter`` : Plot a scatter plot of 4 of the attributes of the housing price data.
 
     * ``info``            : Print information about the housing price data.
+
+    * ``one-hot-encode``  : Apply one-hot encoding to a column of the housing price data.
 
     * ``plot-histograms`` : Plot histograms of the housing price data.
 
@@ -394,3 +398,25 @@ def apply_imputer(strategy: ImputerStrategy) -> None:
     if housing is not None:
         housing_imputed = helpers.apply_imputer(housing, strategy)
         helpers.save_imputed_data(config, housing_imputed, strategy)
+
+
+@main.command(cls=click_command_cls)
+@click.option(
+    "column_name",
+    "--column-name",
+    type=str,
+    default="ocean_proximity",
+    help="The column name to one-hot encode. Default is 'ocean_proximity'.",
+)
+def one_hot_encode(column_name: str) -> None:
+    """``housing-prices one-hot-encode`` applies one-hot encoding to a column of the housing price data."""
+    config = Config()
+    housing = helpers.get_housing_data(config, download=True)
+    if housing is not None:
+        if column_name not in housing.columns:
+            logging.error(
+                f"Invalid column name '{column_name}'. Valid column names are: {housing.columns}"
+            )
+            return
+        encoded_data = helpers.one_hot_encode(housing[[column_name]])
+        helpers.save_one_hot_encoded_data(config, encoded_data, column_name)

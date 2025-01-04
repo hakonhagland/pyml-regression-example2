@@ -5,6 +5,7 @@ class Directories:
     columns = "columns"
     crc = "crc"
     imputed = "imputed"
+    one_hot = "one_hot"
     stratified = "stratified"
 
 
