@@ -422,3 +422,48 @@ class TestOneHotEncodeCmd:
             assert caplog.records[-1].message.startswith("Invalid column name")
         else:
             assert result.exit_code == 0
+
+
+class TestScaleColumnCmd:
+    @pytest.mark.parametrize(
+        "duplicate_col,bad_column_name,bad_scaling_method",
+        [
+            [False, False, False],
+            [True, False, False],
+            [False, True, False],
+            [False, False, True],
+        ],
+    )
+    def test_invoke(
+        self,
+        duplicate_col: bool,
+        bad_column_name: bool,
+        bad_scaling_method: bool,
+        caplog: LogCaptureFixture,
+        prepare_config_dir: PrepareConfigDir,
+        prepare_data_dir: PrepareDataDir,
+    ) -> None:
+        caplog.set_level(logging.INFO)
+        prepare_data_dir(datafiles_exists=True, housing_csv=True)
+        prepare_config_dir(add_config_ini=True)
+        runner = CliRunner()
+        args = ["scale-columns", "--column-names"]
+        if bad_column_name:
+            args.append("bad_column")
+        elif duplicate_col:
+            args.append("median_income,median_income")
+        else:
+            args.append("median_income,median_house_value")
+        if bad_scaling_method:
+            args.extend(["--scaling-method", "bad_method"])
+        else:
+            args.extend(["--scaling-method", "standard"])
+        result = runner.invoke(main.main, args)
+        if bad_column_name:
+            assert caplog.records[-1].message.startswith("Invalid column name")
+        elif duplicate_col:
+            assert caplog.records[-1].message.startswith("Duplicate column names")
+        elif bad_scaling_method:
+            assert result.stdout.startswith("Usage: main scale-columns")
+        else:
+            assert result.exit_code == 0

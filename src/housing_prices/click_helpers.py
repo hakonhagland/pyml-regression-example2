@@ -1,4 +1,4 @@
-from housing_prices.constants import ImputerStrategy, TestSetGenMethod
+from housing_prices.constants import ImputerStrategy, ScalingMethod, TestSetGenMethod
 from typing import Union
 import click
 
@@ -33,6 +33,20 @@ def validate_imputer_strategy(
     keys = ", ".join(list(ImputerStrategy.keys()))
     raise click.BadParameter(
         f"Invalid imputation strategy value '{value}'. Must be one of: {values}. "
+        f"Or alternatively, use the lower case names: {keys}."
+    )
+
+
+def validate_scaling_method(
+    ctx: click.Context, param: Union[click.Option, click.Parameter], value: str
+) -> ScalingMethod:
+    value = value.upper()
+    if value in ScalingMethod.keys():
+        return ScalingMethod[value]
+    values = ", ".join(list(ScalingMethod.values()))
+    keys = ", ".join(list(ScalingMethod.keys()))
+    raise click.BadParameter(
+        f"Invalid scaling strategy value '{value}'. Must be one of: {values}. "
         f"Or alternatively, use the lower case names: {keys}."
     )
 

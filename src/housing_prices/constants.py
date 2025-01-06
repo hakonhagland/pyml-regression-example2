@@ -6,6 +6,7 @@ class Directories:
     crc = "crc"
     imputed = "imputed"
     one_hot = "one_hot"
+    scaled = "scaled"
     stratified = "stratified"
 
 
@@ -20,23 +21,34 @@ class FileNames:
     train_csv = "train.csv"
 
 
-class ImputerStrategy(enum.Enum):
+class BaseEnum(enum.Enum):
+    """Base class for enums with keys and values."""
+
+    @classmethod
+    def keys(cls) -> set[str]:
+        return set(cls.__members__.keys())
+
+    @classmethod
+    def values(cls) -> set[str]:
+        return {member.value for member in cls}
+
+
+class ImputerStrategy(BaseEnum):
     """Imputation strategies."""
 
     MEAN = "mean"
     MEDIAN = "median"
     MOST_FREQUENT = "most_frequent"
 
-    @staticmethod
-    def keys() -> set[str]:
-        return set(ImputerStrategy.__members__.keys())
 
-    @staticmethod
-    def values() -> set[str]:
-        return {member.value for member in ImputerStrategy}
+class ScalingMethod(BaseEnum):
+    """Scaling methods for the data."""
+
+    STANDARD = "standard"
+    MINMAX = "minmax"
 
 
-class TestSetGenMethod(enum.Enum):
+class TestSetGenMethod(BaseEnum):
     """Test set generation methods."""
 
     CRC = "CRC"  # Cyclic redundancy check
@@ -46,11 +58,3 @@ class TestSetGenMethod(enum.Enum):
     @property
     def dirname(self) -> str:  # For creating directories with lowercase names
         return self.name.lower()
-
-    @staticmethod
-    def keys() -> set[str]:
-        return set(TestSetGenMethod.__members__.keys())
-
-    @staticmethod
-    def values() -> set[str]:
-        return {member.value for member in TestSetGenMethod}

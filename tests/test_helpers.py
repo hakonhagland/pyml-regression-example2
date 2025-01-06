@@ -1,9 +1,12 @@
 import os
 import pytest
+
+import pandas as pd
+
 from pytest_mock.plugin import MockerFixture
 
 from housing_prices.config import Config
-from housing_prices.constants import FileNames
+from housing_prices.constants import FileNames, ScalingMethod
 import housing_prices.helpers as helpers
 from .common import PrepareConfigDir, PrepareDataDir
 
@@ -106,3 +109,19 @@ class TestDownloadData:
         config = Config()
         helpers.get_housing_data(config, download=False)
         assert True
+
+
+class TestScalingMethod:
+    def test_scale_data(self) -> None:
+        data = pd.DataFrame([[1, 2], [3, 4]], columns=["A", "B"])
+        scaled_data = helpers.scale_data(data, ScalingMethod.STANDARD)
+        assert scaled_data.shape == (2, 2)
+        assert scaled_data.loc[0, "A"] == -1
+        assert scaled_data.loc[0, "B"] == -1
+        assert scaled_data.loc[1, "A"] == 1
+        assert scaled_data.loc[1, "B"] == 1
+        scaled_data = helpers.scale_data(data, ScalingMethod.MINMAX)
+        assert scaled_data.loc[0, "A"] == 0
+        assert scaled_data.loc[0, "B"] == 0
+        assert scaled_data.loc[1, "A"] == 1
+        assert scaled_data.loc[1, "B"] == 1

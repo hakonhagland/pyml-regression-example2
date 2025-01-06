@@ -17,7 +17,7 @@ from pandas.plotting import scatter_matrix
 from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
 
 from housing_prices.config import Config
-from housing_prices.constants import ImputerStrategy, TestSetGenMethod
+from housing_prices.constants import ImputerStrategy, ScalingMethod, TestSetGenMethod
 from housing_prices.split_data import SplitCrc, SplitStratified
 from housing_prices import click_helpers, helpers
 
@@ -74,6 +74,8 @@ def main(ctx: click.Context, verbose: bool) -> None:
     * ``one-hot-encode``  : Apply one-hot encoding to a column of the housing price data.
 
     * ``plot-histograms`` : Plot histograms of the housing price data.
+
+    * ``scale-columns``   : Scale the specified columns of the housing price data.
 
     * ``stratify-column`` : Stratify the data in a column of the housing price data.
 
@@ -420,3 +422,39 @@ def one_hot_encode(column_name: str) -> None:
             return
         encoded_data = helpers.one_hot_encode(housing[[column_name]])
         helpers.save_one_hot_encoded_data(config, encoded_data, column_name)
+
+
+@main.command(cls=click_command_cls)
+@click.option(
+    "column_names",
+    "--column-names",
+    type=str,
+    callback=click_helpers.validate_column_names,
+    default="longitude,latitude,housing_median_age,total_rooms,total_bedrooms,population,households,median_income,median_house_value",
+    help="The column names to scale. Comma separated list of column names. Default is 'all numerical columns'.",
+)
+@click.option(
+    "scaling_method",
+    "--scaling-method",
+    type=str,
+    default="MinMax",
+    callback=click_helpers.validate_scaling_method,
+    help="The scaling method to use. Possible values are: MinMax or Standard. Default is 'MinMaxScaler'.",
+)
+def scale_columns(column_names: list[str], scaling_method: ScalingMethod) -> None:
+    """``housing-prices scale_columns`` scales the specified columns of the housing price data.
+    The ``column_names`` argument is a comma-separated list of column names to scale. If no column
+    names are given, all numerical columns are scaled. The ``scaler`` option specifies the scaler"""
+    config = Config()
+    housing = helpers.get_housing_data(config, download=True)
+    if housing is not None:
+        if len(set(column_names)) < len(column_names):
+            logging.error("Duplicate column names are not allowed.")
+            return
+        elif not all(col in housing.columns for col in column_names):
+            logging.error(
+                f"Invalid column name. Valid column names are: {housing.columns}"
+            )
+            return
+        scaled_data = helpers.scale_data(housing[column_names], scaling_method)
+        helpers.save_scaled_data(config, scaled_data, scaling_method)

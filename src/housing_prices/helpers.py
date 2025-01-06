@@ -13,7 +13,7 @@ from pathlib import Path
 import sklearn.impute  # type: ignore
 import sklearn.preprocessing  # type: ignore
 from housing_prices.config import Config
-from housing_prices.constants import FileNames, ImputerStrategy
+from housing_prices.constants import FileNames, ImputerStrategy, ScalingMethod
 
 
 def apply_imputer(data: pd.DataFrame, strategy: ImputerStrategy) -> pd.DataFrame:
@@ -166,6 +166,14 @@ def save_one_hot_encoded_data(
     logging.info(f"One-hot encoded data saved to {encoded_file}")
 
 
+def save_scaled_data(
+    config: Config, data: pd.DataFrame, scaling_method: ScalingMethod
+) -> None:
+    scaled_file = config.get_scaled_data_csv_filename(scaling_method.value)
+    data.to_csv(scaled_file, index=False)
+    logging.info(f"Scaled data saved to {scaled_file}")
+
+
 def save_stratified_column(
     config: Config,
     column_name: str,
@@ -179,6 +187,25 @@ def save_stratified_column(
         f.write("\n".join([str(b) for b in bins]))
     logging.info(f"Stratified column saved to {stratified_file}")
     logging.info(f"Bin info saved to {bin_file}")
+
+
+def scale_data(data: pd.DataFrame, method: ScalingMethod) -> pd.DataFrame:
+    """Scale the data using the specified strategy."""
+    if method == ScalingMethod.STANDARD:
+        scaler = sklearn.preprocessing.StandardScaler()
+    elif method == ScalingMethod.MINMAX:
+        scaler = sklearn.preprocessing.MinMaxScaler()
+    else:
+        # Should never happen since the method is an enum
+        raise ValueError(f"Unknown scaling method: {method}")  # pragma: no cover
+    scaler.fit(data)
+    logging.info(f"Scaling data using method: {method.value}")
+    logging.info(f"Scaling on columns: {data.columns}")
+    return pd.DataFrame(
+        scaler.transform(data),
+        columns=data.columns,
+        index=data.index,
+    )
 
 
 def split_data_with_id_hash(
