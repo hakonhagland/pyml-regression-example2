@@ -75,6 +75,9 @@ def main(ctx: click.Context, verbose: bool) -> None:
 
     * ``plot-histograms`` : Plot histograms of the housing price data.
 
+    * ``rbf-kernel``      : Apply the Radial Basis Function (RBF) kernel to a column of the
+      housing price data.
+
     * ``scale-columns``   : Scale the specified columns of the housing price data.
 
     * ``stratify-column`` : Stratify the data in a column of the housing price data.
@@ -458,3 +461,42 @@ def scale_columns(column_names: list[str], scaling_method: ScalingMethod) -> Non
             return
         scaled_data = helpers.scale_data(housing[column_names], scaling_method)
         helpers.save_scaled_data(config, scaled_data, scaling_method)
+
+
+@main.command(cls=click_command_cls)
+@click.argument("column-name", type=str)
+@click.option(
+    "peak_value",
+    "--peak-value",
+    type=float,
+    required=True,
+    help="The peak value of the RBF kernel.",
+)
+@click.option(
+    "gamma",
+    "--gamma",
+    type=float,
+    required=True,
+    help="The gamma value of the RBF kernel.",
+)
+def rbf_kernel(column_name: str, peak_value: float, gamma: float) -> None:
+    """``housing-prices rbf-kernel`` applies the Radial Basis Function (RBF) kernel to a column
+    of the housing price data. The ``column-name`` argument is the column to apply the kernel to.
+    The ``peak-value`` option is the peak value of the RBF kernel. The ``gamma`` option is the gamma
+    value of the RBF kernel."""
+    config = Config()
+    housing = helpers.get_housing_data(config, download=True)
+    if housing is not None:
+        if column_name not in housing.columns:
+            logging.error(
+                f"Invalid column name '{column_name}'. Valid column names are: {housing.columns}"
+            )
+            return
+        if not pd.api.types.is_numeric_dtype(housing[column_name]):
+            logging.error(
+                f"Column '{column_name}' is not a numerical column. RBF kernel can only be applied "
+                "to numerical columns."
+            )
+            return
+        similarity = helpers.rbf_kernel(housing[column_name], peak_value, gamma)
+        helpers.save_rbf_kernel(config, similarity, column_name, peak_value, gamma)

@@ -6,6 +6,7 @@ class Directories:
     crc = "crc"
     imputed = "imputed"
     one_hot = "one_hot"
+    rbf = "rbf"
     scaled = "scaled"
     stratified = "stratified"
 

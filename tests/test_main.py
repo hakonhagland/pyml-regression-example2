@@ -467,3 +467,42 @@ class TestScaleColumnCmd:
             assert result.stdout.startswith("Usage: main scale-columns")
         else:
             assert result.exit_code == 0
+
+
+class TestRbfKernelCmd:
+    @pytest.mark.parametrize(
+        "bad_column_name,not_numeric",
+        [
+            [False, False],
+            [True, False],
+            [False, True],
+        ],
+    )
+    def test_invoke(
+        self,
+        bad_column_name: bool,
+        not_numeric: bool,
+        caplog: LogCaptureFixture,
+        prepare_config_dir: PrepareConfigDir,
+        prepare_data_dir: PrepareDataDir,
+    ) -> None:
+        caplog.set_level(logging.INFO)
+        prepare_data_dir(datafiles_exists=True, housing_csv=True)
+        prepare_config_dir(add_config_ini=True)
+        runner = CliRunner()
+        args = ["rbf-kernel", "--peak-value", "35", "--gamma", "0.1"]
+        if bad_column_name:
+            args.append("bad_column")
+        elif not_numeric:
+            args.append("ocean_proximity")
+        else:
+            args.append("housing_median_age")
+        result = runner.invoke(main.main, args)
+        if bad_column_name:
+            assert caplog.records[-1].message.startswith("Invalid column name")
+        elif not_numeric:
+            assert caplog.records[-1].message.startswith(
+                "Column 'ocean_proximity' is not a numerical column"
+            )
+        else:
+            assert result.exit_code == 0

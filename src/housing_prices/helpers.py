@@ -1,3 +1,7 @@
+# Tell Python to defer evaluating type hints until runtime and store them as strings internally,
+# preventing errors like TypeError: type 'Series' is not subscriptable
+from __future__ import annotations
+
 import logging
 import requests
 import shutil
@@ -12,6 +16,7 @@ from pathlib import Path
 
 import sklearn.impute  # type: ignore
 import sklearn.preprocessing  # type: ignore
+import sklearn.metrics.pairwise  # type: ignore
 from housing_prices.config import Config
 from housing_prices.constants import FileNames, ImputerStrategy, ScalingMethod
 
@@ -141,6 +146,16 @@ def one_hot_encode(data: pd.DataFrame) -> pd.DataFrame:
     )
 
 
+def rbf_kernel(
+    data: pd.Series[float], peak_value: float, gamma: float
+) -> pd.Series[float]:
+    """Create a radial basis function (RBF) kernel for the specified column."""
+    ndarray = sklearn.metrics.pairwise.rbf_kernel(
+        data.to_frame(), [[peak_value]], gamma=gamma
+    )
+    return pd.Series(ndarray.flatten(), index=data.index, dtype=float)
+
+
 def read_stratified_column_bins(config: Config, column_name: str) -> list[float]:
     bin_file = config.get_stratified_column_bin_filename(column_name)
     if not bin_file.exists():
@@ -164,6 +179,18 @@ def save_one_hot_encoded_data(
     encoded_file = config.get_one_hot_encoded_csv_filename(column_name)
     data.to_csv(encoded_file, index=False)
     logging.info(f"One-hot encoded data saved to {encoded_file}")
+
+
+def save_rbf_kernel(
+    config: Config,
+    similarity: pd.Series[float],
+    column_name: str,
+    peak_value: float,
+    gamma: float,
+) -> None:
+    kernel_file = config.get_rbf_kernel_csv_filename(column_name, peak_value, gamma)
+    similarity.to_csv(kernel_file, index=False)
+    logging.info(f"RBF kernel saved to {kernel_file}")
 
 
 def save_scaled_data(
