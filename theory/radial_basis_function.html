@@ -1,0 +1,203 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Radial Basis Functions (RBF) &mdash; pyml-regression-example2 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Results" href="../results.html" />
+    <link rel="prev" title="OrdinalEncoder and OneHotEncoder" href="one_hot_encoder.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            pyml-regression-example2
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../theory.html">Theory</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="linear_regression.html">LinearRegression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="least_squares.html">Ordinary Least Squares</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stratified_sampling.html">Stratified sampling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="correlation.html">Introduction to Correlation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="correlation.html#pearsons-correlation-coefficient-population">Pearson’s Correlation Coefficient (Population)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="correlation.html#sample-correlation">Sample Correlation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="median.html">Median</a></li>
+<li class="toctree-l2"><a class="reference internal" href="one_hot_encoder.html">OrdinalEncoder and OneHotEncoder</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Radial Basis Functions (RBF)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#using-sklearn-metrics-pairwise-rbf-kernel">Using <code class="docutils literal notranslate"><span class="pre">sklearn.metrics.pairwise.rbf_kernel</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-with-pandas-creating-a-new-similarity-feature">Example with Pandas: Creating a New Similarity Feature</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../results.html">Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../todo.html">TODO</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyml-regression-example2</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../theory.html">Theory</a></li>
+      <li class="breadcrumb-item active">Radial Basis Functions (RBF)</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/hakonhagland/pyml-regression-example2/blob/main/docs/theory/radial_basis_function.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="radial-basis-functions-rbf">
+<h1>Radial Basis Functions (RBF)<a class="headerlink" href="#radial-basis-functions-rbf" title="Link to this heading"></a></h1>
+<p>We can measure how <em>similar</em> two data points are by using a <em>kernel function</em>. One such kernel is the <strong>Radial Basis Function</strong> (RBF), sometimes also called the Gaussian kernel.</p>
+<div class="math notranslate nohighlight">
+\[K(\mathbf{x}, \mathbf{y}) = \exp(-\gamma \|\mathbf{x} - \mathbf{y}\|^2)\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\mathbf{x}\)</span> and <span class="math notranslate nohighlight">\(\mathbf{y}\)</span> are feature vectors (points in some input space).</p></li>
+<li><p><span class="math notranslate nohighlight">\(\|\mathbf{x} - \mathbf{y}\|^2\)</span> is the squared Euclidean distance between <span class="math notranslate nohighlight">\(\mathbf{x}\)</span> and <span class="math notranslate nohighlight">\(\mathbf{y}\)</span>.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\gamma\)</span> (gamma) is a parameter that controls how quickly the similarity measure decreases with distance.</p></li>
+</ul>
+<p>In more intuitive terms, the RBF kernel outputs values close to 1 for two points that are very close together in the feature space, and values close to 0 for points that are far apart. This makes it a useful tool for measuring the “closeness” or “similarity” of data samples and is often used in algorithms where we want to capture complex, non-linear relationships.</p>
+<section id="using-sklearn-metrics-pairwise-rbf-kernel">
+<h2>Using <code class="docutils literal notranslate"><span class="pre">sklearn.metrics.pairwise.rbf_kernel</span></code><a class="headerlink" href="#using-sklearn-metrics-pairwise-rbf-kernel" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">scikit-learn</span></code> library provides the function <code class="xref py py-func docutils literal notranslate"><span class="pre">sklearn.metrics.pairwise.rbf_kernel()</span></code> to compute the RBF kernel (similarities) between sets of points. This function is useful when you want to compute the RBF kernel between two sets of points (e.g., two datasets) or between a set of points and a single reference point.</p>
+<p>Basic usage:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.metrics.pairwise</span> <span class="kn">import</span> <span class="n">rbf_kernel</span>
+
+<span class="c1"># Suppose X and Y are NumPy arrays of shape (n_samples_x, n_features)</span>
+<span class="c1"># and (n_samples_y, n_features) respectively:</span>
+<span class="n">similarity_matrix</span> <span class="o">=</span> <span class="n">rbf_kernel</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here, <code class="docutils literal notranslate"><span class="pre">similarity_matrix</span></code> will be a matrix where each entry <code class="docutils literal notranslate"><span class="pre">similarity_matrix[i,</span> <span class="pre">j]</span></code> is <span class="math notranslate nohighlight">\(K(\mathbf{x}_i, \mathbf{y}_j)\)</span>.</p>
+</section>
+<section id="example-with-pandas-creating-a-new-similarity-feature">
+<h2>Example with Pandas: Creating a New Similarity Feature<a class="headerlink" href="#example-with-pandas-creating-a-new-similarity-feature" title="Link to this heading"></a></h2>
+<p>Let’s walk through a simple example where we have a Pandas <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code>, and we want to create a new column that measures how similar each value in one column is to a particular <em>reference value</em> (scalar) under the RBF kernel.</p>
+<p>For instance, imagine we have a dataset with a numeric column called <code class="docutils literal notranslate"><span class="pre">&quot;height&quot;</span></code>. We decide we want to create a feature that measures how similar each row’s <code class="docutils literal notranslate"><span class="pre">height</span></code> is to a <em>single</em> reference value (say, <code class="docutils literal notranslate"><span class="pre">170</span> <span class="pre">cm</span></code>). We can treat the reference value as a single-point array and compute the RBF similarity.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics.pairwise</span> <span class="kn">import</span> <span class="n">rbf_kernel</span>
+
+<span class="c1"># Example data</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s1">&#39;height&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">160</span><span class="p">,</span> <span class="mi">165</span><span class="p">,</span> <span class="mi">170</span><span class="p">,</span> <span class="mi">175</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">185</span><span class="p">]</span>
+<span class="p">})</span>
+
+<span class="c1"># Convert height column to a 2D array (n_samples, n_features)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s1">&#39;height&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span>  <span class="c1"># shape: (6, 1)</span>
+
+<span class="c1"># We&#39;ll define a reference value (Y) as a single-point array</span>
+<span class="n">reference_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">170</span><span class="p">]])</span>  <span class="c1"># shape: (1, 1)</span>
+
+<span class="c1"># Choose a gamma value (this controls how quickly similarity decays with distance)</span>
+<span class="n">gamma</span> <span class="o">=</span> <span class="mf">0.1</span>
+
+<span class="c1"># Compute RBF similarities</span>
+<span class="c1"># rbf_kernel(X, reference_value) returns shape: (6, 1)</span>
+<span class="n">similarity_values</span> <span class="o">=</span> <span class="n">rbf_kernel</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">reference_value</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="n">gamma</span><span class="p">)</span>
+
+<span class="c1"># Flatten the result so it&#39;s easier to put back into the DataFrame</span>
+<span class="n">df</span><span class="p">[</span><span class="s1">&#39;height_similarity_to_170&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">similarity_values</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In this snippet:</p>
+<ol class="arabic simple">
+<li><p>We extract the <code class="docutils literal notranslate"><span class="pre">height</span></code> column as <code class="docutils literal notranslate"><span class="pre">X</span></code> (2D array).</p></li>
+<li><p>We define our reference value <code class="docutils literal notranslate"><span class="pre">Y</span></code> as a single-row array containing <code class="docutils literal notranslate"><span class="pre">170</span></code>.</p></li>
+<li><p>We compute the RBF similarity between each row’s height and <code class="docutils literal notranslate"><span class="pre">170</span></code> using <code class="docutils literal notranslate"><span class="pre">rbf_kernel</span></code>.</p></li>
+<li><p>We store the result in a new column called <code class="docutils literal notranslate"><span class="pre">height_similarity_to_170</span></code>.</p></li>
+</ol>
+<p>So, if <span class="math notranslate nohighlight">\(h_i\)</span> is the height at row <span class="math notranslate nohighlight">\(i\)</span>, then each entry in our new column is:</p>
+<div class="math notranslate nohighlight">
+\[\mathrm{similarity}_i = \exp\bigl(-\gamma (h_i - 170)^2\bigr)\]</div>
+<p>A few notes:</p>
+<ul class="simple">
+<li><p>If <span class="math notranslate nohighlight">\(\gamma\)</span> is large, then even relatively small differences <span class="math notranslate nohighlight">\((h_i - 170)\)</span> will cause the RBF value to drop quickly.</p></li>
+<li><p>If <span class="math notranslate nohighlight">\(\gamma\)</span> is small, the RBF values will decay more slowly, and points farther from <code class="docutils literal notranslate"><span class="pre">170</span></code> will still have relatively high similarity.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="one_hot_encoder.html" class="btn btn-neutral float-left" title="OrdinalEncoder and OneHotEncoder" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../results.html" class="btn btn-neutral float-right" title="Results" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Håkon Hægland.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -58,6 +58,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#housing-prices-info">info</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#housing-prices-one-hot-encode">one-hot-encode</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#housing-prices-plot-histograms">plot-histograms</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#housing-prices-rbf-kernel">rbf-kernel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#housing-prices-scale-columns">scale-columns</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#housing-prices-scatter-plot">scatter-plot</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#housing-prices-stratify-column">stratify-column</a></li>
@@ -123,6 +124,8 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">info</span></code>            : Print information about the housing price data.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">one-hot-encode</span></code>  : Apply one-hot encoding to a column of the housing price data.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">plot-histograms</span></code> : Plot histograms of the housing price data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rbf-kernel</span></code>      : Apply the Radial Basis Function (RBF) kernel to a column of the
+housing price data.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">scale-columns</span></code>   : Scale the specified columns of the housing price data.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">stratify-column</span></code> : Stratify the data in a column of the housing price data.</p></li>
 </ul>
@@ -280,6 +283,36 @@ The size of the markers is proportional to the population of each district.</p>
 <dt class="sig sig-object std" id="cmdoption-housing-prices-plot-histograms-c">
 <span id="cmdoption-housing-prices-plot-histograms-column-name"></span><span class="sig-name descname"><span class="pre">-c</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--column-name</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;column_name&gt;</span></span><a class="headerlink" href="#cmdoption-housing-prices-plot-histograms-c" title="Link to this definition"></a></dt>
 <dd><p>The column name to plot. If not given, all columns are plotted. A list of valid column names can be obtained with the <code class="docutils literal notranslate"><span class="pre">housing-prices</span> <span class="pre">info</span></code> command.</p>
+</dd></dl>
+
+</section>
+<section id="housing-prices-rbf-kernel">
+<h4>rbf-kernel<a class="headerlink" href="#housing-prices-rbf-kernel" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">housing-prices</span> <span class="pre">rbf-kernel</span></code> applies the Radial Basis Function (RBF) kernel to a column
+of the housing price data. The <code class="docutils literal notranslate"><span class="pre">column-name</span></code> argument is the column to apply the kernel to.
+The <code class="docutils literal notranslate"><span class="pre">peak-value</span></code> option is the peak value of the RBF kernel. The <code class="docutils literal notranslate"><span class="pre">gamma</span></code> option is the gamma
+value of the RBF kernel.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>housing-prices<span class="w"> </span>rbf-kernel<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span>COLUMN_NAME
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-housing-prices-rbf-kernel-peak-value">
+<span class="sig-name descname"><span class="pre">--peak-value</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;peak_value&gt;</span></span><a class="headerlink" href="#cmdoption-housing-prices-rbf-kernel-peak-value" title="Link to this definition"></a></dt>
+<dd><p><strong>Required</strong> The peak value of the RBF kernel.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-housing-prices-rbf-kernel-gamma">
+<span class="sig-name descname"><span class="pre">--gamma</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;gamma&gt;</span></span><a class="headerlink" href="#cmdoption-housing-prices-rbf-kernel-gamma" title="Link to this definition"></a></dt>
+<dd><p><strong>Required</strong> The gamma value of the RBF kernel.</p>
+</dd></dl>
+
+<p class="rubric">Arguments</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-housing-prices-rbf-kernel-arg-COLUMN_NAME">
+<span class="sig-name descname"><span class="pre">COLUMN_NAME</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-housing-prices-rbf-kernel-arg-COLUMN_NAME" title="Link to this definition"></a></dt>
+<dd><p>Required argument</p>
 </dd></dl>
 
 </section>
