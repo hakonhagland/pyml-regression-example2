@@ -13,6 +13,7 @@ import sklearn  # type: ignore
 import numpy as np
 import pandas as pd
 from pathlib import Path
+from numpy.typing import NDArray
 
 import sklearn.impute  # type: ignore
 import sklearn.preprocessing  # type: ignore
@@ -163,6 +164,14 @@ def read_stratified_column_bins(config: Config, column_name: str) -> list[float]
     with open(bin_file, "r") as f:
         bins = [float(line.strip()) for line in f]
     return bins
+
+
+def save_cluster_similarities(
+    config: Config, data: NDArray[np.float64], num_clusters: int, gamma: float
+) -> None:
+    cluster_file = config.get_cluster_similarities_csv_filename(num_clusters, gamma)
+    np.savetxt(cluster_file, data, delimiter=",", fmt="%.4e")
+    logging.info(f"Cluster similarities saved to {cluster_file}")
 
 
 def save_imputed_data(

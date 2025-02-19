@@ -76,6 +76,16 @@ class Config:
             f"The data directory {str(lock_file.parent)} might be owned by another app."
         )
 
+    def get_cluster_similarities_csv_filename(
+        self, num_clusters: int, gamma: float
+    ) -> Path:
+        datadir: Path = self.get_data_dir()
+        dir_ = datadir / Directories.cluster_similarities
+        if not dir_.exists():
+            dir_.mkdir(parents=True)
+        csv_file = dir_ / f"{num_clusters}_{gamma}.csv"
+        return csv_file
+
     def get_config_dir(self) -> Path:
         return self.config_dir  # pragma: no cover
 

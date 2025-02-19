@@ -12,10 +12,12 @@ import numpy as np
 import pandas as pd
 
 from pandas.plotting import scatter_matrix
+from matplotlib.markers import MarkerStyle
 
 # import plotly.graph_objects as go
 from sphinx_click.rst_to_ansi_formatter import make_rst_to_ansi_formatter
 
+import housing_prices.cluster_similarity
 from housing_prices.config import Config
 from housing_prices.constants import ImputerStrategy, ScalingMethod, TestSetGenMethod
 from housing_prices.split_data import SplitCrc, SplitStratified
@@ -500,3 +502,60 @@ def rbf_kernel(column_name: str, peak_value: float, gamma: float) -> None:
             return
         similarity = helpers.rbf_kernel(housing[column_name], peak_value, gamma)
         helpers.save_rbf_kernel(config, similarity, column_name, peak_value, gamma)
+
+
+@main.command(cls=click_command_cls)
+@click.option(
+    "num_clusters",
+    "--num-clusters",
+    type=int,
+    callback=click_helpers.validate_num_clusters,
+    default=10,
+    help="The number of clusters to create. Default is 10.",
+)
+@click.option(
+    "gamma",
+    "--gamma",
+    type=float,
+    required=True,
+    help="The gamma value of the RBF kernel.",
+)
+def cluster_similarity(num_clusters: int, gamma: float) -> None:
+    """``housing-prices cluster-similarity`` uses the KMeans clustering algorithm to find
+    geographic clusters in the housing price data based on the longitude and latitude columns.
+    The number of clusters to find is set with the ``--num-clusters`` option. The gamma value
+    of the RBF kernel is set with the ``--gamma`` option."""
+    config = Config()
+    housing = helpers.get_housing_data(config, download=True)
+    if housing is not None:
+        similarities, centers = housing_prices.cluster_similarity.transform(
+            housing, num_clusters, gamma
+        )
+        helpers.save_cluster_similarities(config, similarities, num_clusters, gamma)
+        # For each point, find the cluster with the highest similarity. The clusters are
+        # numbered 0, 1, 2, ..., num_clusters - 1. So if similarities is an m x num_clusters
+        # array, then labels is an m x 1 array with the cluster number for each point.
+        labels = np.argmax(similarities, axis=1)
+        fig, ax = plt.subplots(figsize=(8, 6))
+        scatter = ax.scatter(
+            housing["longitude"],
+            housing["latitude"],
+            c=labels,
+            cmap="tab10",
+            s=10,
+            alpha=0.7,
+        )
+        ax.scatter(
+            centers[:, 1],
+            centers[:, 0],
+            s=100,
+            c="black",
+            marker=MarkerStyle("X"),
+            label="Cluster Centers",
+        )
+        ax.set_xlabel("Longitude")
+        ax.set_ylabel("Latitude")
+        ax.set_title("Geographic Distribution by Cluster")
+        plt.legend()
+        plt.colorbar(scatter, ax=ax, label="Cluster Label")
+        plt.show()  # type: ignore

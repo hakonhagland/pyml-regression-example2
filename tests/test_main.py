@@ -506,3 +506,30 @@ class TestRbfKernelCmd:
             )
         else:
             assert result.exit_code == 0
+
+
+class TestClusterSimilarityCmd:
+    @pytest.mark.parametrize("bad_cluster_num", [False, True])
+    def test_invoke(
+        self,
+        bad_cluster_num: bool,
+        mocker: MockerFixture,
+        caplog: LogCaptureFixture,
+        prepare_config_dir: PrepareConfigDir,
+        prepare_data_dir: PrepareDataDir,
+    ) -> None:
+        caplog.set_level(logging.INFO)
+        prepare_data_dir(datafiles_exists=True, housing_csv=True)
+        prepare_config_dir(add_config_ini=True)
+        mocker.patch("matplotlib.pyplot.show", return_value=None)
+        matplotlib.use("Agg")
+        runner = CliRunner()
+        num_clusters = 10
+        if bad_cluster_num:
+            num_clusters = 0
+        args = ["cluster-similarity", "--num-clusters", num_clusters, "--gamma", "1.0"]
+        result = runner.invoke(main.main, args)  # type: ignore
+        if bad_cluster_num:
+            assert result.stdout.startswith("Usage: main cluster-similarity")
+        else:
+            assert result.exit_code == 0

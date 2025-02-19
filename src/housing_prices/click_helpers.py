@@ -37,6 +37,14 @@ def validate_imputer_strategy(
     )
 
 
+def validate_num_clusters(
+    ctx: click.Context, param: Union[click.Option, click.Parameter], value: int
+) -> int:
+    if value < 1:
+        raise click.BadParameter("Number of clusters must be a positive integer")
+    return value
+
+
 def validate_scaling_method(
     ctx: click.Context, param: Union[click.Option, click.Parameter], value: str
 ) -> ScalingMethod:

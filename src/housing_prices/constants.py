@@ -2,6 +2,7 @@ import enum
 
 
 class Directories:
+    cluster_similarities = "cluster_similarities"
     columns = "columns"
     crc = "crc"
     imputed = "imputed"
