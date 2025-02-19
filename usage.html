@@ -50,6 +50,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#commands">Commands</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#housing-prices">housing-prices</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#housing-prices-apply-imputer">apply-imputer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#housing-prices-cluster-similarity">cluster-similarity</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#housing-prices-correlation-info">correlation-info</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#housing-prices-create-test-set">create-test-set</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#housing-prices-describe-column">describe-column</a></li>
@@ -151,6 +152,29 @@ to fill missing values.</p>
 <dt class="sig sig-object std" id="cmdoption-housing-prices-apply-imputer-strategy">
 <span class="sig-name descname"><span class="pre">--strategy</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;strategy&gt;</span></span><a class="headerlink" href="#cmdoption-housing-prices-apply-imputer-strategy" title="Link to this definition"></a></dt>
 <dd><p>The strategy to fill missing values. Possible values are ‘mean’, ‘median’, and ‘most_frequent’. Default is ‘median’.</p>
+</dd></dl>
+
+</section>
+<section id="housing-prices-cluster-similarity">
+<h4>cluster-similarity<a class="headerlink" href="#housing-prices-cluster-similarity" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">housing-prices</span> <span class="pre">cluster-similarity</span></code> uses the KMeans clustering algorithm to find
+geographic clusters in the housing price data based on the longitude and latitude columns.
+The number of clusters to find is set with the <code class="docutils literal notranslate"><span class="pre">--num-clusters</span></code> option. The gamma value
+of the RBF kernel is set with the <code class="docutils literal notranslate"><span class="pre">--gamma</span></code> option.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>housing-prices<span class="w"> </span>cluster-similarity<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-housing-prices-cluster-similarity-num-clusters">
+<span class="sig-name descname"><span class="pre">--num-clusters</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;num_clusters&gt;</span></span><a class="headerlink" href="#cmdoption-housing-prices-cluster-similarity-num-clusters" title="Link to this definition"></a></dt>
+<dd><p>The number of clusters to create. Default is 10.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-housing-prices-cluster-similarity-gamma">
+<span class="sig-name descname"><span class="pre">--gamma</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;gamma&gt;</span></span><a class="headerlink" href="#cmdoption-housing-prices-cluster-similarity-gamma" title="Link to this definition"></a></dt>
+<dd><p><strong>Required</strong> The gamma value of the RBF kernel.</p>
 </dd></dl>
 
 </section>
