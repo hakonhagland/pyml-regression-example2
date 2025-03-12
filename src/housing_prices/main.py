@@ -59,30 +59,33 @@ def main(ctx: click.Context, verbose: bool) -> None:
 
     The following subcommands are available:
 
-    * ``apply-imputer``   : Apply the imputer to the housing price data to fill missing values.
+    * ``apply-imputer``      : Apply the imputer to the housing price data to fill missing values.
 
-    * ``correlation-info``: Print the correlation information about a specific column.
+    * ``cluster-similarity`` : Use the KMeans clustering algorithm to find geographic clusters
+      in the housing price data.
 
-    * ``create-test-set`` : Create a test set from the housing price data.
+    * ``correlation-info``   : Print the correlation information about a specific column.
 
-    * ``describe-column`` : Print information about a specific column in the housing price data.
+    * ``create-test-set``    : Create a test set from the housing price data.
 
-    * ``download-data``   : Download the housing price data from the book's web page.
+    * ``describe-column``    : Print information about a specific column in the housing price data.
 
-    * ``geo-pop-scatter`` : Plot a scatter plot of 4 of the attributes of the housing price data.
+    * ``download-data``      : Download the housing price data from the book's web page.
 
-    * ``info``            : Print information about the housing price data.
+    * ``geo-pop-scatter``    : Plot a scatter plot of 4 of the attributes of the housing price data.
 
-    * ``one-hot-encode``  : Apply one-hot encoding to a column of the housing price data.
+    * ``info``               : Print information about the housing price data.
 
-    * ``plot-histograms`` : Plot histograms of the housing price data.
+    * ``one-hot-encode``     : Apply one-hot encoding to a column of the housing price data.
 
-    * ``rbf-kernel``      : Apply the Radial Basis Function (RBF) kernel to a column of the
+    * ``plot-histograms``    : Plot histograms of the housing price data.
+
+    * ``rbf-kernel``         : Apply the Radial Basis Function (RBF) kernel to a column of the
       housing price data.
 
-    * ``scale-columns``   : Scale the specified columns of the housing price data.
+    * ``scale-columns``      : Scale the specified columns of the housing price data.
 
-    * ``stratify-column`` : Stratify the data in a column of the housing price data.
+    * ``stratify-column``    : Stratify the data in a column of the housing price data.
 
     """
     ctx.ensure_object(dict)
@@ -524,7 +527,9 @@ def cluster_similarity(num_clusters: int, gamma: float) -> None:
     """``housing-prices cluster-similarity`` uses the KMeans clustering algorithm to find
     geographic clusters in the housing price data based on the longitude and latitude columns.
     The number of clusters to find is set with the ``--num-clusters`` option. The gamma value
-    of the RBF kernel is set with the ``--gamma`` option."""
+    of the RBF kernel is set with the ``--gamma`` option. The calculated cluster similarities
+    are saved to a CSV file. Finally, a scatter plot of the geographic distribution of the
+    clusters is created."""
     config = Config()
     housing = helpers.get_housing_data(config, download=True)
     if housing is not None:
