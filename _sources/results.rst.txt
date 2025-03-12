@@ -37,3 +37,9 @@ Running ``housing-prices scatter-plot median_income,median_house_value`` gives:
 .. image:: images/scatter-median_income-median_house_value.png
    :alt: Scatter plot of median income and median house value
    :width: 100%
+
+Running ``housing-prices cluster-similarity --num-clusters=10 --gamma=1.0`` gives:
+
+.. image:: images/cluster-similarity.png
+   :alt: Cluster similarity plot
+   :width: 100%

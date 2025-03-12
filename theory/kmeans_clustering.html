@@ -1,0 +1,214 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The K-means clustering algorithm &mdash; pyml-regression-example2 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Results" href="../results.html" />
+    <link rel="prev" title="Radial Basis Functions (RBF)" href="radial_basis_function.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            pyml-regression-example2
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../theory.html">Theory</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="linear_regression.html">LinearRegression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="least_squares.html">Ordinary Least Squares</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stratified_sampling.html">Stratified sampling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="correlation.html">Introduction to Correlation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="correlation.html#pearsons-correlation-coefficient-population">Pearson’s Correlation Coefficient (Population)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="correlation.html#sample-correlation">Sample Correlation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="median.html">Median</a></li>
+<li class="toctree-l2"><a class="reference internal" href="one_hot_encoder.html">OrdinalEncoder and OneHotEncoder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="radial_basis_function.html">Radial Basis Functions (RBF)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">The K-means clustering algorithm</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-k-means-objective-and-computational-difficulty">The K-means objective and computational difficulty</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#history-and-variants-of-the-lloyd-algorithm">History and variants of the Lloyd algorithm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#outline-of-the-lloyd-algorithm">Outline of the Lloyd algorithm</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../results.html">Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../todo.html">TODO</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pyml-regression-example2</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../theory.html">Theory</a></li>
+      <li class="breadcrumb-item active">The K-means clustering algorithm</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/hakonhagland/pyml-regression-example2/blob/main/docs/theory/kmeans_clustering.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="the-k-means-clustering-algorithm">
+<h1>The K-means clustering algorithm<a class="headerlink" href="#the-k-means-clustering-algorithm" title="Link to this heading"></a></h1>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.cluster.KMeans</span></code> algorithm clusters data by trying to
+separate samples into <span class="math notranslate nohighlight">\(n\)</span> groups of equal variance, minimizing a
+criterion known as the <em>inertia</em> or <em>within-cluster sum-of-squares</em> (see below).
+This algorithm requires the number of clusters to be specified. It scales well
+to large numbers of samples and has been used across a large range of
+application areas in many different fields.</p>
+<p>The k-means algorithm divides a set of <span class="math notranslate nohighlight">\(n\)</span> samples
+<span class="math notranslate nohighlight">\(\{x_1, x_2, \dots, x_n\}\)</span> into <span class="math notranslate nohighlight">\(k\)</span> disjoint clusters
+<span class="math notranslate nohighlight">\(C_1, C_2, \dots, C_k\)</span>, each described by the mean
+<span class="math notranslate nohighlight">\(\mu_j\)</span> of the samples in that cluster:</p>
+<div class="math notranslate nohighlight">
+\[\mu_j = \frac{1}{\lvert C_j \rvert} \sum_{x \in C_j} x.\]</div>
+<p>These means are commonly called the cluster <em>centroids</em>.</p>
+<section id="the-k-means-objective-and-computational-difficulty">
+<h2>The K-means objective and computational difficulty<a class="headerlink" href="#the-k-means-objective-and-computational-difficulty" title="Link to this heading"></a></h2>
+<p>The goal of the K-means algorithm is to partition <span class="math notranslate nohighlight">\(n\)</span> data points into
+<span class="math notranslate nohighlight">\(k\)</span> clusters in such a way as to minimize the <em>within-cluster sum-of-squares</em>.
+Formally, we seek to solve the following minimization problem:</p>
+<div class="math notranslate nohighlight">
+\[\min_{C_1, \ldots, C_k} \sum_{j=1}^k \sum_{x \in C_j} \lVert x - \mu_j \rVert^2,\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mu_j\)</span> is the mean (or <em>centroid</em>) of cluster <span class="math notranslate nohighlight">\(C_j\)</span>. This
+is equivalent to minimizing the pairwise squared deviations of the points within
+each cluster. While straightforward to formulate, this problem is known to be
+NP-hard in the general case. Nonetheless, efficient heuristic algorithms have
+been developed that converge quickly in practice to a <em>local optimum</em>, which
+is typically sufficient for many applications.</p>
+</section>
+<section id="history-and-variants-of-the-lloyd-algorithm">
+<h2>History and variants of the Lloyd algorithm<a class="headerlink" href="#history-and-variants-of-the-lloyd-algorithm" title="Link to this heading"></a></h2>
+<p>One of the most common and conceptually simple heuristics for K-means clustering
+is known as the <em>Lloyd algorithm</em>, first proposed by Stuart Lloyd in 1957 (though
+not published until 1982). Essentially, it works as an iterative refinement
+technique and is also sometimes referred to as the “classical” or “vanilla”
+K-means algorithm.</p>
+<p>In <code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.cluster.KMeans</span></code>, you can choose between two algorithms:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">lloyd</span></code>: This is the standard implementation of Lloyd’s algorithm (the default).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">elkan</span></code>: This is a variant that makes use of the triangle inequality and can
+be much faster for certain datasets, especially those with well-separated
+clusters.</p></li>
+</ul>
+<p>For most users, <code class="docutils literal notranslate"><span class="pre">lloyd</span></code> is a sensible default. If you find that K-means is
+slow on your data, it may be worth trying <code class="docutils literal notranslate"><span class="pre">elkan</span></code>.</p>
+</section>
+<section id="outline-of-the-lloyd-algorithm">
+<h2>Outline of the Lloyd algorithm<a class="headerlink" href="#outline-of-the-lloyd-algorithm" title="Link to this heading"></a></h2>
+<p>The Lloyd algorithm starts with an initial set of <span class="math notranslate nohighlight">\(k\)</span> means, typically
+chosen by the <em>k-means++</em> method (the default in scikit-learn). We can denote
+these initial means as</p>
+<div class="math notranslate nohighlight">
+\[m_1^{(1)}, m_2^{(1)}, \ldots, m_k^{(1)}.\]</div>
+<p>The algorithm then proceeds by alternating between two main steps:</p>
+<ol class="arabic">
+<li><p><strong>Assignment step</strong>:</p>
+<p>In this step, each data point is assigned to the cluster whose current centroid
+is nearest in terms of Euclidean distance. Mathematically, for each data point
+<span class="math notranslate nohighlight">\(x_i\)</span>, we find the cluster index <span class="math notranslate nohighlight">\(j\)</span> such that</p>
+<div class="math notranslate nohighlight">
+\[j = \underset{1 \leq \ell \leq k}{\mathrm{argmin}} \,
+\lVert x_i - m_\ell^{(t)} \rVert^2,\]</div>
+<p>where <span class="math notranslate nohighlight">\(m_\ell^{(t)}\)</span> is the centroid of cluster <span class="math notranslate nohighlight">\(\ell\)</span> at iteration
+<span class="math notranslate nohighlight">\(t\)</span>.</p>
+<p>All data points thus get <em>re-labeled</em> into the cluster with the closest centroid.</p>
+</li>
+<li><p><strong>Update step</strong>:</p>
+<p>Once every data point has been assigned to a cluster, the centroids are
+recalculated as the mean of the points currently in that cluster. That is, for
+each cluster <span class="math notranslate nohighlight">\(C_j^{(t)}\)</span>, we compute the new centroid as</p>
+<div class="math notranslate nohighlight">
+\[m_j^{(t+1)} = \frac{1}{\lvert C_j^{(t)} \rvert} \sum_{x \in C_j^{(t)}} x.\]</div>
+</li>
+</ol>
+<p>These two steps alternate until convergence, which typically means that cluster
+assignments no longer change, or the changes fall below a user-specified tolerance,
+or a maximum number of iterations is reached.</p>
+<p>Although the algorithm only guarantees convergence to a local optimum, in practice,
+it often yields good clusterings. The default <em>k-means++</em> initialization in
+scikit-learn also helps improve the chances of reaching a better local optimum
+and generally speeds up convergence.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="radial_basis_function.html" class="btn btn-neutral float-left" title="Radial Basis Functions (RBF)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../results.html" class="btn btn-neutral float-right" title="Results" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Håkon Hægland.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

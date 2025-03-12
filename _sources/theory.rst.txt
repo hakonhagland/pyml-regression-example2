@@ -11,6 +11,8 @@ Theory
    theory/median
    theory/one_hot_encoder
    theory/radial_basis_function
+   theory/kmeans_clustering
+
 
 See the sections below for more information on the theory behind the models and methods used in
 ``sklearn`` for `linear regressions <https://scikit-learn.org/stable/modules/linear_model.html>`__.
@@ -22,3 +24,4 @@ See the sections below for more information on the theory behind the models and 
 * :doc:`median <theory/median>`.
 * :doc:`one hot encoder <theory/one_hot_encoder>`.
 * :doc:`radial basis function <theory/radial_basis_function>`.
+* :doc:`k-means clustering <theory/kmeans_clustering>`.
